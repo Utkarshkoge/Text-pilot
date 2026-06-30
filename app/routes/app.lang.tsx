@@ -180,6 +180,16 @@ export default function LanguageSelector() {
     const [currentPage, setCurrentPage] = useState(1);
     const pageSize = 50;
 
+    const translatedCount = useMemo(() => {
+        if (!translation) return 0;
+        return Object.values(translation).filter(v => v.trim() !== '').length;
+    }, [translation]);
+
+    const notTranslatedCount = useMemo(() => {
+        if (!translation) return 0;
+        return Object.values(translation).filter(v => v.trim() === '').length;
+    }, [translation]);
+
     const filteredTranslations = useMemo(() => {
         if (!translation) return null;
 
@@ -493,7 +503,7 @@ export default function LanguageSelector() {
                                     </BlockStack>
                                     {translation && (
                                         <ButtonGroup>
-                                            <CsvExportButton translation={translation} filename={selectedNode?.handle || 'translations'} />
+                                            <CsvExportButton translation={translation} filename={selectedNode ? `${selectedNode.language.jsonValue}_${selectedNode.locale.jsonValue}` : 'translations'} />
                                             <CsvImportModals
                                                 currentTranslation={translation}
                                                 onImportConfirm={(updates) => {
@@ -552,16 +562,25 @@ export default function LanguageSelector() {
                                             <ButtonGroup segmented>
                                                 <Button
                                                     pressed={translationFilter === 'all'}
-                                                    onClick={() => setTranslationFilter('all')}
-                                                >All</Button>
+                                                    onClick={() => {
+                                                        setTranslationFilter('all');
+                                                        setTimeout(() => scrollContainerRef.current?.scrollTo({ top: 0, behavior: 'smooth' }), 50);
+                                                    }}
+                                                >All {" "}</Button>
                                                 <Button
                                                     pressed={translationFilter === 'translated'}
-                                                    onClick={() => setTranslationFilter('translated')}
-                                                >Translated</Button>
+                                                    onClick={() => {
+                                                        setTranslationFilter('translated');
+                                                        setTimeout(() => scrollContainerRef.current?.scrollTo({ top: 0, behavior: 'smooth' }), 50);
+                                                    }}
+                                                >Translated ({translatedCount})</Button>
                                                 <Button
                                                     pressed={translationFilter === 'not_translated'}
-                                                    onClick={() => setTranslationFilter('not_translated')}
-                                                >Not Translated</Button>
+                                                    onClick={() => {
+                                                        setTranslationFilter('not_translated');
+                                                        setTimeout(() => scrollContainerRef.current?.scrollTo({ top: 0, behavior: 'smooth' }), 50);
+                                                    }}
+                                                >Not Translated ({notTranslatedCount})</Button>
                                             </ButtonGroup>
                                         </InlineStack>
                                         <InlineStack gap="300" blockAlign="center">
@@ -648,7 +667,9 @@ export default function LanguageSelector() {
                                                                     />
 
                                                                     <Banner tone="warning">
-                                                                        <Text as="p">If <strong>Auto Translate</strong> is on, the "Key Name" will be used as the source text for translation.</Text>
+                                                                        <Text as="p">
+                                                                            <strong>Auto Translate</strong> uses a free translation service. Please verify the generated translations before using them. The <strong>Key Name</strong> will be used as the source text.
+                                                                        </Text>
                                                                     </Banner>
                                                                 </BlockStack>
                                                             </BlockStack>

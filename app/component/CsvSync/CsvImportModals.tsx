@@ -58,7 +58,7 @@ export function CsvImportModals({ currentTranslation, onImportConfirm }: CsvImpo
                         <Card padding="400">
                             <BlockStack gap="200">
                                 <Text as="h3" variant="headingSm">Option 1: Add Keys Only</Text>
-                                <Text as="p" tone="subdued">Import only translation keys without translated values. Existing keys will not be overwritten.</Text>
+                                <Text as="p" tone="subdued">Import only translation keys without translated values.</Text>
                                 <InlineStack gap="300" blockAlign="center">
                                     <Button onClick={() => triggerFileInput('keys_only')}>Select CSV File</Button>
                                     <Button variant="plain" onClick={() => handleDownloadTemplate('keys_only')}>Download Template</Button>
@@ -68,7 +68,7 @@ export function CsvImportModals({ currentTranslation, onImportConfirm }: CsvImpo
                         <Card padding="400">
                             <BlockStack gap="200">
                                 <Text as="h3" variant="headingSm">Option 2: Add Keys with Translation</Text>
-                                <Text as="p" tone="subdued">Import translation keys together with their translated values. Existing keys will be updated.</Text>
+                                <Text as="p" tone="subdued">Import translation keys together with their translated values.</Text>
                                 <InlineStack gap="300" blockAlign="center">
                                     <Button onClick={() => triggerFileInput('keys_with_translation')}>Select CSV File</Button>
                                     <Button variant="plain" onClick={() => handleDownloadTemplate('keys_with_translation')}>Download Template</Button>
@@ -116,13 +116,13 @@ export function CsvImportModals({ currentTranslation, onImportConfirm }: CsvImpo
                         ) : (
                             <>
                                 <InlineGrid columns="3" gap="400">
-                                    <Card padding="400">
+                                    <Card padding="300">
                                         <BlockStack gap="100">
                                             <Text as="h3" variant="headingSm">Total CSV Entries</Text>
                                             <Text as="p" variant="headingLg">{csvPreviewData.length}</Text>
                                         </BlockStack>
                                     </Card>
-                                    <Card padding="400">
+                                    <Card padding="300">
                                         <BlockStack gap="100">
                                             <Text as="h3" variant="headingSm">Valid Entries</Text>
                                             <Text as="p" variant="headingLg" tone="success">
@@ -130,7 +130,7 @@ export function CsvImportModals({ currentTranslation, onImportConfirm }: CsvImpo
                                             </Text>
                                         </BlockStack>
                                     </Card>
-                                    <Card padding="400">
+                                    <Card padding="300">
                                         <BlockStack gap="100">
                                             <Text as="h3" variant="headingSm">Duplicate Entries</Text>
                                             <Text as="p" variant="headingLg" tone="critical">
@@ -142,8 +142,10 @@ export function CsvImportModals({ currentTranslation, onImportConfirm }: CsvImpo
 
                                 {csvPreviewData.length > 0 && (
                                     <BlockStack gap="200">
-                                        <Banner tone="info">
-                                            <Text as="p"><strong>Duplicate entries will not be imported. Only valid entries will be added.</strong></Text>
+                                        <Banner tone="warning">
+                                            <Text as="p">
+                                                <strong>Duplicate entries (repeated in the CSV or already present in the selected language) will be skipped. Only valid entries will be imported.</strong>
+                                            </Text>
                                         </Banner>
                                         <ButtonGroup segmented>
                                             <Button
