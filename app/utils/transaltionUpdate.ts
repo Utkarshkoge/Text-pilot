@@ -134,7 +134,7 @@ export async function updateMetaobjectFields(
 
 export async function hasMetaobjectDefinition(admin: any) {
     const res = await admin.graphql(METAOBJECT_DEFINITION_QUERY, {
-        variables: { type: "translation_apply" },
+        variables: { type: "_text_pilot_app" },
     });
     const json = await res.json();
     return !!json.data?.metaobjectDefinitionByType;
@@ -145,7 +145,6 @@ export async function createMetaobjectDefinition(admin: any) {
     const json = await res.json();
     const result = json.data?.metaobjectDefinitionCreate;
 
-    console.log(JSON.stringify(json, null, 2), '...........utkarsh')
     if (!result) {
         throw new Error('Definition creation failed');
     }

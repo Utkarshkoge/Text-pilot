@@ -1,6 +1,6 @@
 export const AUTHORS_QUERY = `#graphql
   query Authors {
-    metaobjects(type: "translation_apply", first: 250) {
+    metaobjects(type: "_text_pilot_app", first: 250) {
       nodes {
         id
         locale: field(key: "locale") {
@@ -55,7 +55,7 @@ export const METAOBJECT_UPDATE_MUTATION = `
 export const METAOBJECT_CREATE_MUTATION = `#graphql
   mutation CreateMetaobject($locale: String!, $language: String!) {
     metaobjectCreate(metaobject: {
-      type: "translation_apply",
+      type: "_text_pilot_app",
       fields: [
         { key: "locale", value: $locale },
         { key: "language", value: $language },
@@ -126,8 +126,8 @@ export const METAOBJECT_DEFINITION_CREATE_MUTATION = `#graphql
   mutation CreateMetaobjectDefinition {
     metaobjectDefinitionCreate(
       definition: {
-        name: "Translation Apply"
-        type: "translation_apply"
+        name: "Text Pilot App"
+        type: "_text_pilot_app"
         displayNameKey: "locale"
         fieldDefinitions: [
           { key: "locale", name: "Locale", type: "single_line_text_field" },

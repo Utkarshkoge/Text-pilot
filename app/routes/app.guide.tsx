@@ -147,7 +147,7 @@ export async function loader({ request, context }: LoaderFunctionArgs) {
   const QUERY = \`
     query FindTranslationByLocale($query: String!) {
       metaobjects(
-        type: "translation_apply"
+        type: "_text_pilot_app"
         first: 1
         query: $query
       ) {

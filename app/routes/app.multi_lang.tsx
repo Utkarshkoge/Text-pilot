@@ -2,7 +2,7 @@ import type { LoaderFunctionArgs, ActionFunctionArgs } from 'react-router';
 import { authenticate } from '../shopify.server';
 import { useLoaderData, useFetcher, useNavigate } from 'react-router';
 import { useEffect, useState, useRef } from 'react';
-import { BlockStack, Card, Page, Text, Box, InlineStack, Button, Checkbox, TextField, ProgressBar, Banner, Divider, Modal, InlineGrid, useBreakpoints, DataTable } from '@shopify/polaris';
+import { BlockStack, Card, Page, Text, Box, InlineStack, Button, Checkbox, TextField, ProgressBar, Banner, Divider, Modal, InlineGrid, useBreakpoints, DataTable, EmptyState } from '@shopify/polaris';
 import { DeleteIcon } from '@shopify/polaris-icons';
 import { AUTHORS_QUERY } from '../query/translationQuery';
 import { fetchMetaobjectById, updateMetaobjectTranslation, hasMetaobjectDefinition } from '../utils/transaltionUpdate';
@@ -126,14 +126,20 @@ export async function action({ request }: ActionFunctionArgs) {
     }
 }
 
-export default function MultiLanguageUpdate() {
-    const { nodes: rawNodes, hasDefinition } = useLoaderData<typeof loader>();
-    const fetcher = useFetcher<any>();
-    const navigate = useNavigate();
-
+export default function MultiLanguageUpdateWrapper() {
+    const { hasDefinition } = useLoaderData<typeof loader>();
+    
     if (!hasDefinition) {
         return <TranslationDefinitionMissing />;
     }
+
+    return <MultiLanguageUpdate />;
+}
+
+function MultiLanguageUpdate() {
+    const { nodes: rawNodes } = useLoaderData<typeof loader>();
+    const fetcher = useFetcher<any>();
+    const navigate = useNavigate();
 
     const nodes = rawNodes as LanguageNode[];
 
@@ -397,278 +403,293 @@ export default function MultiLanguageUpdate() {
                     <button onClick={startOver}>Discard</button>
                 </SaveBar>
 
-                <InlineGrid columns={mdUp && processingStatus === 'idle' ? '240px 1fr' : '1fr'} gap="400" alignItems="start">
+                {nodes.length === 0 ? (
+                    <Card>
+                        <EmptyState
+                            heading="No languages defined"
+                            action={{
+                                content: 'Add Language',
+                                onAction: () => navigate("/app/definition")
+                            }}
+                            image="https://cdn.shopify.com/s/files/1/0262/4071/2726/files/emptystate-files.png"
+                        >
+                            <p>You need to create at least one language before managing translations.</p>
+                        </EmptyState>
+                    </Card>
+                ) : (
+                    <InlineGrid columns={mdUp && processingStatus === 'idle' ? '240px 1fr' : '1fr'} gap="400" alignItems="start">
 
-                    {/* 1. SELECT LANGUAGES */}
-                    {processingStatus === 'idle' && (
-                        <Card>
-                            <BlockStack gap="200">
-                                <Text as="h2" variant="headingMd">Select Languages ({selectedIds.size})</Text>
-                                {processingStatus === 'idle' && (
-                                    <Box paddingBlockEnd="200" borderColor="border" borderBlockEndWidth="025">
-                                        <Button onClick={toggleAll} size="micro">
-                                            {selectedIds.size === nodes.length ? "Deselect All" : "Select All"}
-                                        </Button>
-                                    </Box>
-                                )}
-                                <div style={{ maxHeight: '500px', overflowY: 'auto' }}>
-                                    <BlockStack gap="050">
-                                        {nodes.map(node => {
-                                            const isSelected = selectedIds.has(node.id);
-                                            return (
-                                                <div
-                                                    key={node.id}
-                                                    style={{
-                                                        padding: 'var(--p-space-200)',
-                                                        cursor: 'pointer',
-                                                        borderRadius: 'var(--p-border-radius-200)',
-                                                        transition: 'all 0.2s',
-                                                        borderLeft: '3px solid',
-                                                        borderColor: isSelected ? 'var(--p-color-border-interactive)' : 'transparent',
-                                                        backgroundColor: isSelected ? 'var(--p-color-bg-surface-hover)' : 'transparent',
-                                                    }}
-                                                >
-                                                    <InlineStack align="space-between" blockAlign="center">
-                                                        <Checkbox
-                                                            label={`${node.language.jsonValue}`}
-                                                            checked={isSelected}
-                                                            onChange={() => {
-                                                                if (processingStatus === 'running') return;
-                                                                toggleSelection(node);
-                                                            }}
-                                                            disabled={processingStatus === 'running'}
-                                                        />
-                                                    </InlineStack>
-                                                </div>
-                                            );
-                                        })}
-                                    </BlockStack>
-                                </div>
-                            </BlockStack>
-                        </Card>
-                    )}
-
-                    {/* RIGHT COLUMN */}
-                    <BlockStack gap="100">
-                        {selectedIds.size === 0 ? (
+                        {/* 1. SELECT LANGUAGES */}
+                        {processingStatus === 'idle' && (
                             <Card>
-                                <Box padding="800">
-                                    <BlockStack gap="200" align="center" inlineAlign="center">
-                                        <Text as="h2" variant="headingMd" alignment="center">No Language Selected</Text>
-                                        <Text as="p" tone="subdued" alignment="center">
-                                            Please select at least one language from the list first to define keys and apply translations.
-                                        </Text>
-                                    </BlockStack>
-                                </Box>
-                            </Card>
-                        ) : (
-                            <>
-                                {/* 2. DEFINE KEYS */}
-                                {processingStatus === 'idle' && (
-                                    <Card>
-                                        <BlockStack gap="100">
-                                            <Text as="h2" variant="headingMd">Add Keys</Text>
-                                            <Text as="p" tone="subdued">Define the keys to add across selected languages.</Text>
-
-                                            {/* <Banner tone="warning">
-                                                <Text as="p">
-                                                    <strong>Auto Translate</strong> uses a free translation service. Please verify the generated translations before using them. The <strong>Key Name</strong> will be used as the source text.
-                                                </Text>
-                                            </Banner> */}
-
-                                            {/* ADD KEY INPUT */}
-                                            <Box background="bg-surface-secondary" padding="300" borderRadius="200">
-                                                <InlineStack gap="300" align="start">
+                                <BlockStack gap="200">
+                                    <Text as="h2" variant="headingMd">Select Languages ({selectedIds.size})</Text>
+                                    {processingStatus === 'idle' && (
+                                        <Box paddingBlockEnd="200" borderColor="border" borderBlockEndWidth="025">
+                                            <Button onClick={toggleAll} size="micro">
+                                                {selectedIds.size === nodes.length ? "Deselect All" : "Select All"}
+                                            </Button>
+                                        </Box>
+                                    )}
+                                    <div style={{ maxHeight: '500px', overflowY: 'auto' }}>
+                                        <BlockStack gap="050">
+                                            {nodes.map(node => {
+                                                const isSelected = selectedIds.has(node.id);
+                                                return (
                                                     <div
-                                                        style={{ flex: 1 }}
-                                                        onKeyDown={(e: React.KeyboardEvent) => {
-                                                            if (e.key === 'Enter') addDirectKey();
+                                                        key={node.id}
+                                                        style={{
+                                                            padding: 'var(--p-space-200)',
+                                                            cursor: 'pointer',
+                                                            borderRadius: 'var(--p-border-radius-200)',
+                                                            transition: 'all 0.2s',
+                                                            borderLeft: '3px solid',
+                                                            borderColor: isSelected ? 'var(--p-color-border-interactive)' : 'transparent',
+                                                            backgroundColor: isSelected ? 'var(--p-color-bg-surface-hover)' : 'transparent',
                                                         }}
                                                     >
-                                                        <TextField
-                                                            label="Key Name"
-                                                            value={directKey}
-                                                            onChange={setDirectKey}
-                                                            autoComplete="off"
-                                                            placeholder="e.g. welcome_message"
-                                                        />
-                                                    </div>
-                                                    <Box paddingBlockStart="600">
-                                                        <InlineStack gap="200">
-                                                            <Button onClick={addDirectKey} disabled={!directKey.trim()}>Add</Button>
-                                                            <CsvImportModals
-                                                                currentTranslation={schema}
-                                                                onImportConfirm={(updates) => {
-                                                                    setSchema(prev => ({ ...updates, ...prev }));
-                                                                    setShowApplySection(false);
-                                                                    setCurrentPage(1);
-                                                                    setTimeout(() => scrollContainerRef.current?.scrollTo({ top: 0, behavior: 'smooth' }), 50);
+                                                        <InlineStack align="space-between" blockAlign="center">
+                                                            <Checkbox
+                                                                label={`${node.language.jsonValue}`}
+                                                                checked={isSelected}
+                                                                onChange={() => {
+                                                                    if (processingStatus === 'running') return;
+                                                                    toggleSelection(node);
                                                                 }}
-                                                                buttonText="Add via CSV"
+                                                                disabled={processingStatus === 'running'}
                                                             />
                                                         </InlineStack>
-                                                    </Box>
-                                                </InlineStack>
-                                            </Box>
+                                                    </div>
+                                                );
+                                            })}
+                                        </BlockStack>
+                                    </div>
+                                </BlockStack>
+                            </Card>
+                        )}
 
-                                            {/* PREVIEW LIST */}
-                                            {schemaKeys.length > 0 && (
-                                                <div style={{
-                                                    padding: 'var(--p-space-200)',
-                                                    border: '1px solid var(--p-color-border)',
-                                                    borderRadius: 'var(--p-border-radius-200)',
-                                                    marginTop: 'var(--p-space-200)'
-                                                }}>
-                                                    <BlockStack gap="200">
-                                                        <InlineStack align="space-between">
-                                                            <InlineStack gap="300" blockAlign="center">
-                                                                <Text as="h3" variant="headingSm">Keys to Apply ({schemaKeys.length})</Text>
-                                                                <Button variant="plain" tone="critical" onClick={() => setIsClearModalActive(true)}>Clear All</Button>
-                                                            </InlineStack>
-                                                            {totalPages > 1 && (
-                                                                <InlineStack gap="300" blockAlign="center">
-                                                                    <Button onClick={() => {
+                        {/* RIGHT COLUMN */}
+                        <BlockStack gap="100">
+                            {selectedIds.size === 0 ? (
+                                <Card>
+                                    <Box padding="800">
+                                        <BlockStack gap="200" align="center" inlineAlign="center">
+                                            <Text as="h2" variant="headingMd" alignment="center">No Language Selected</Text>
+                                            <Text as="p" tone="subdued" alignment="center">
+                                                Please select at least one language from the list first to define keys and apply translations.
+                                            </Text>
+                                        </BlockStack>
+                                    </Box>
+                                </Card>
+                            ) : (
+                                <>
+                                    {/* 2. DEFINE KEYS */}
+                                    {processingStatus === 'idle' && (
+                                        <Card>
+                                            <BlockStack gap="100">
+                                                <Text as="h2" variant="headingMd">Add Keys</Text>
+                                                <Text as="p" tone="subdued">Define the keys to add across selected languages.</Text>
+
+                                                {/* <Banner tone="warning">
+                                                    <Text as="p">
+                                                        <strong>Auto Translate</strong> uses a free translation service. Please verify the generated translations before using them. The <strong>Key Name</strong> will be used as the source text.
+                                                    </Text>
+                                                </Banner> */}
+
+                                                {/* ADD KEY INPUT */}
+                                                <Box background="bg-surface-secondary" padding="300" borderRadius="200">
+                                                    <InlineStack gap="300" align="start">
+                                                        <div
+                                                            style={{ flex: 1 }}
+                                                            onKeyDown={(e: React.KeyboardEvent) => {
+                                                                if (e.key === 'Enter') addDirectKey();
+                                                            }}
+                                                        >
+                                                            <TextField
+                                                                label="Key Name"
+                                                                value={directKey}
+                                                                onChange={setDirectKey}
+                                                                autoComplete="off"
+                                                                placeholder="e.g. welcome_message"
+                                                            />
+                                                        </div>
+                                                        <Box paddingBlockStart="600">
+                                                            <InlineStack gap="200">
+                                                                <Button onClick={addDirectKey} disabled={!directKey.trim()}>Add</Button>
+                                                                <CsvImportModals
+                                                                    currentTranslation={schema}
+                                                                    onImportConfirm={(updates) => {
+                                                                        setSchema(prev => ({ ...updates, ...prev }));
+                                                                        setShowApplySection(false);
                                                                         setCurrentPage(1);
                                                                         setTimeout(() => scrollContainerRef.current?.scrollTo({ top: 0, behavior: 'smooth' }), 50);
-                                                                    }} disabled={currentPage === 1}>First</Button>
-                                                                    <Button onClick={() => {
-                                                                        setCurrentPage(p => p - 1);
-                                                                        setTimeout(() => scrollContainerRef.current?.scrollTo({ top: 0, behavior: 'smooth' }), 50);
-                                                                    }} disabled={currentPage === 1}>Previous</Button>
-                                                                    <Text as="span" variant="bodySm">
-                                                                        Page {currentPage} of {totalPages}
-                                                                    </Text>
-                                                                    <Button onClick={() => {
-                                                                        setCurrentPage(p => p + 1);
-                                                                        setTimeout(() => scrollContainerRef.current?.scrollTo({ top: 0, behavior: 'smooth' }), 50);
-                                                                    }} disabled={currentPage === totalPages}>Next</Button>
-                                                                </InlineStack>
-                                                            )}
-                                                        </InlineStack>
-                                                        <Divider />
+                                                                    }}
+                                                                    buttonText="Add via CSV"
+                                                                />
+                                                            </InlineStack>
+                                                        </Box>
+                                                    </InlineStack>
+                                                </Box>
 
-                                                        <div ref={scrollContainerRef} style={{ maxHeight: '300px', overflowY: 'auto' }}>
+                                                {/* PREVIEW LIST */}
+                                                {schemaKeys.length > 0 && (
+                                                    <div style={{
+                                                        padding: 'var(--p-space-200)',
+                                                        border: '1px solid var(--p-color-border)',
+                                                        borderRadius: 'var(--p-border-radius-200)',
+                                                        marginTop: 'var(--p-space-200)'
+                                                    }}>
+                                                        <BlockStack gap="200">
+                                                            <InlineStack align="space-between">
+                                                                <InlineStack gap="300" blockAlign="center">
+                                                                    <Text as="h3" variant="headingSm">Keys to Apply ({schemaKeys.length})</Text>
+                                                                    <Button variant="plain" tone="critical" onClick={() => setIsClearModalActive(true)}>Clear All</Button>
+                                                                </InlineStack>
+                                                                {totalPages > 1 && (
+                                                                    <InlineStack gap="300" blockAlign="center">
+                                                                        <Button onClick={() => {
+                                                                            setCurrentPage(1);
+                                                                            setTimeout(() => scrollContainerRef.current?.scrollTo({ top: 0, behavior: 'smooth' }), 50);
+                                                                        }} disabled={currentPage === 1}>First</Button>
+                                                                        <Button onClick={() => {
+                                                                            setCurrentPage(p => p - 1);
+                                                                            setTimeout(() => scrollContainerRef.current?.scrollTo({ top: 0, behavior: 'smooth' }), 50);
+                                                                        }} disabled={currentPage === 1}>Previous</Button>
+                                                                        <Text as="span" variant="bodySm">
+                                                                            Page {currentPage} of {totalPages}
+                                                                        </Text>
+                                                                        <Button onClick={() => {
+                                                                            setCurrentPage(p => p + 1);
+                                                                            setTimeout(() => scrollContainerRef.current?.scrollTo({ top: 0, behavior: 'smooth' }), 50);
+                                                                        }} disabled={currentPage === totalPages}>Next</Button>
+                                                                    </InlineStack>
+                                                                )}
+                                                            </InlineStack>
+                                                            <Divider />
+
+                                                            <div ref={scrollContainerRef} style={{ maxHeight: '300px', overflowY: 'auto' }}>
+                                                                <BlockStack gap="0">
+                                                                    {paginatedKeys.map((key, index) => {
+                                                                        const overallIndex = (currentPage - 1) * pageSize + index + 1;
+                                                                        return (
+                                                                            <KeyPreviewRow
+                                                                                key={key}
+                                                                                keyName={key}
+                                                                                index={overallIndex}
+                                                                                onRemove={() => removeKey(key)}
+                                                                            />
+                                                                        );
+                                                                    })}
+                                                                </BlockStack>
+                                                            </div>
+                                                        </BlockStack>
+                                                    </div>
+                                                )}
+                                            </BlockStack>
+                                        </Card>
+                                    )}
+
+                                    {/* 3. APPLY */}
+                                    {(showApplySection || processingStatus !== 'idle') && (
+                                        <Card>
+                                            <BlockStack>
+
+                                                {processingStatus === 'idle' && (
+                                                    <BlockStack gap="200">
+                                                        <Card>
+                                                            <BlockStack gap="100">
+                                                                <Text as="h2" variant="headingMd">
+                                                                    Apply Changes
+                                                                </Text>
+
+                                                                <Checkbox
+                                                                    label="Enable auto-translation for new keys"
+                                                                    checked={autoTranslate}
+                                                                    onChange={(v) => setAutoTranslate(v)}
+                                                                />
+
+                                                                <Banner tone="warning">
+                                                                    <Text as="p">
+                                                                        <strong>Auto Translate</strong> uses a free translation service. Please verify the generated translations before using them. The <strong>Key Name</strong> will be used as the source text.
+                                                                    </Text>
+                                                                </Banner>
+                                                            </BlockStack>
+                                                        </Card>
+
+                                                        {selectedIds.size > 0 && schemaKeys.length > 0 && (
+                                                            <Button
+                                                                variant="primary"
+                                                                size="large"
+                                                                onClick={() => setIsApplyModalActive(true)}
+                                                            >
+                                                                Apply Changes
+                                                            </Button>
+                                                        )}
+                                                    </BlockStack>
+                                                )}
+                                                {processingStatus === 'running' && (
+                                                    <BlockStack gap="200">
+                                                        {/* @ts-ignore */}
+                                                        <ProgressBar progress={Math.round((completedCount / (totalToProcess.current || 1)) * 100)} />
+                                                        <Text as="p" alignment="center">
+                                                            Processing {completedCount} / {totalToProcess.current} Languages
+                                                        </Text>
+
+                                                        <div style={{
+                                                            border: '1px solid var(--p-color-border-secondary)',
+                                                            borderRadius: 'var(--p-border-radius-200)',
+                                                            maxHeight: '300px',
+                                                            overflowY: 'auto'
+                                                        }}>
                                                             <BlockStack gap="0">
-                                                                {paginatedKeys.map((key, index) => {
-                                                                    const overallIndex = (currentPage - 1) * pageSize + index + 1;
+                                                                {Array.from(selectedIds).map(id => {
+                                                                    const node = nodes.find(n => n.id === id);
+                                                                    const prog = languageProgress[id];
+                                                                    if (!node || !prog) return null;
+
+                                                                    let statusNode;
+                                                                    if (prog.status === 'pending') statusNode = <Text as="span" tone="subdued">⏳ Pending</Text>;
+                                                                    else if (prog.status === 'translating') statusNode = <Text as="span" tone="info">🔄 Translating ({prog.keysDone}/{prog.keysTotal})</Text>;
+                                                                    else if (prog.status === 'saving') statusNode = <Text as="span" tone="caution">💾 Saving...</Text>;
+                                                                    else if (prog.status === 'complete') statusNode = <Text as="span" tone="success">✅ Complete</Text>;
+                                                                    else if (prog.status === 'error') statusNode = <Text as="span" tone="critical">❌ Error: {prog.errorMessage}</Text>;
+
                                                                     return (
-                                                                        <KeyPreviewRow
-                                                                            key={key}
-                                                                            keyName={key}
-                                                                            index={overallIndex}
-                                                                            onRemove={() => removeKey(key)}
-                                                                        />
+                                                                        <div key={id} style={{
+                                                                            padding: 'var(--p-space-200)',
+                                                                            borderBottom: '1px solid var(--p-color-border-secondary)',
+                                                                            backgroundColor: prog.status === 'translating' || prog.status === 'saving' ? 'var(--p-color-bg-surface-hover)' : 'transparent'
+                                                                        }}>
+                                                                            <InlineStack align="space-between" blockAlign="center">
+                                                                                <Text as="span" fontWeight={prog.status === 'translating' || prog.status === 'saving' ? "bold" : "regular"}>
+                                                                                    {node.language.jsonValue} ({node.locale.jsonValue})
+                                                                                </Text>
+                                                                                {statusNode}
+                                                                            </InlineStack>
+                                                                        </div>
                                                                     );
                                                                 })}
                                                             </BlockStack>
                                                         </div>
                                                     </BlockStack>
-                                                </div>
-                                            )}
-                                        </BlockStack>
-                                    </Card>
-                                )}
+                                                )}
 
-                                {/* 3. APPLY */}
-                                {(showApplySection || processingStatus !== 'idle') && (
-                                    <Card>
-                                        <BlockStack>
-
-                                            {processingStatus === 'idle' && (
-                                                <BlockStack gap="200">
-                                                    <Card>
-                                                        <BlockStack gap="100">
-                                                            <Text as="h2" variant="headingMd">
-                                                                Apply Changes
-                                                            </Text>
-
-                                                            <Checkbox
-                                                                label="Enable auto-translation for new keys"
-                                                                checked={autoTranslate}
-                                                                onChange={(v) => setAutoTranslate(v)}
-                                                            />
-
-                                                            <Banner tone="warning">
-                                                                <Text as="p">
-                                                                    <strong>Auto Translate</strong> uses a free translation service. Please verify the generated translations before using them. The <strong>Key Name</strong> will be used as the source text.
-                                                                </Text>
-                                                            </Banner>
-                                                        </BlockStack>
-                                                    </Card>
-
-                                                    {selectedIds.size > 0 && schemaKeys.length > 0 && (
-                                                        <Button
-                                                            variant="primary"
-                                                            size="large"
-                                                            onClick={() => setIsApplyModalActive(true)}
-                                                        >
-                                                            Apply Changes
-                                                        </Button>
-                                                    )}
-                                                </BlockStack>
-                                            )}
-                                            {processingStatus === 'running' && (
-                                                <BlockStack gap="200">
-                                                    {/* @ts-ignore */}
-                                                    <ProgressBar progress={Math.round((completedCount / (totalToProcess.current || 1)) * 100)} />
-                                                    <Text as="p" alignment="center">
-                                                        Processing {completedCount} / {totalToProcess.current} Languages
-                                                    </Text>
-
-                                                    <div style={{
-                                                        border: '1px solid var(--p-color-border-secondary)',
-                                                        borderRadius: 'var(--p-border-radius-200)',
-                                                        maxHeight: '300px',
-                                                        overflowY: 'auto'
-                                                    }}>
-                                                        <BlockStack gap="0">
-                                                            {Array.from(selectedIds).map(id => {
-                                                                const node = nodes.find(n => n.id === id);
-                                                                const prog = languageProgress[id];
-                                                                if (!node || !prog) return null;
-
-                                                                let statusNode;
-                                                                if (prog.status === 'pending') statusNode = <Text as="span" tone="subdued">⏳ Pending</Text>;
-                                                                else if (prog.status === 'translating') statusNode = <Text as="span" tone="info">🔄 Translating ({prog.keysDone}/{prog.keysTotal})</Text>;
-                                                                else if (prog.status === 'saving') statusNode = <Text as="span" tone="caution">💾 Saving...</Text>;
-                                                                else if (prog.status === 'complete') statusNode = <Text as="span" tone="success">✅ Complete</Text>;
-                                                                else if (prog.status === 'error') statusNode = <Text as="span" tone="critical">❌ Error: {prog.errorMessage}</Text>;
-
-                                                                return (
-                                                                    <div key={id} style={{
-                                                                        padding: 'var(--p-space-200)',
-                                                                        borderBottom: '1px solid var(--p-color-border-secondary)',
-                                                                        backgroundColor: prog.status === 'translating' || prog.status === 'saving' ? 'var(--p-color-bg-surface-hover)' : 'transparent'
-                                                                    }}>
-                                                                        <InlineStack align="space-between" blockAlign="center">
-                                                                            <Text as="span" fontWeight={prog.status === 'translating' || prog.status === 'saving' ? "bold" : "regular"}>
-                                                                                {node.language.jsonValue} ({node.locale.jsonValue})
-                                                                            </Text>
-                                                                            {statusNode}
-                                                                        </InlineStack>
-                                                                    </div>
-                                                                );
-                                                            })}
-                                                        </BlockStack>
-                                                    </div>
-                                                </BlockStack>
-                                            )}
-
-                                            {processingStatus === 'complete' && (
-                                                <BlockStack gap="100" align="center">
-                                                    <Text as="h3" variant="headingLg" tone="success" alignment="center">All Done!</Text>
-                                                    <Box paddingBlockStart="200">
-                                                        <Button size="large" onClick={startOver}>Start New Operation</Button>
-                                                    </Box>
-                                                </BlockStack>
-                                            )}
-                                        </BlockStack>
-                                    </Card>
-                                )}
-                            </>
-                        )}
-                    </BlockStack>
-                </InlineGrid>
+                                                {processingStatus === 'complete' && (
+                                                    <BlockStack gap="100" align="center">
+                                                        <Text as="h3" variant="headingLg" tone="success" alignment="center">All Done!</Text>
+                                                        <Box paddingBlockStart="200">
+                                                            <Button size="large" onClick={startOver}>Start New Operation</Button>
+                                                        </Box>
+                                                    </BlockStack>
+                                                )}
+                                            </BlockStack>
+                                        </Card>
+                                    )}
+                                </>
+                            )}
+                        </BlockStack>
+                    </InlineGrid>
+                )}
 
                 <Modal
                     open={isApplyModalActive}

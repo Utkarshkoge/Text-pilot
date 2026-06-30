@@ -4,7 +4,7 @@ export async function check(request: Request) {
   const { admin } = await authenticate.admin(request);
   const response = await admin.graphql(`
     query {
-      metaobjects(type: "translation_apply", first: 1) {
+      metaobjects(type: "_text_pilot_app", first: 1) {
         nodes {
           id
           handle

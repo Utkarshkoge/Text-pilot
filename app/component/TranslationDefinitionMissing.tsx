@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useFetcher } from "react-router";
 import {
     Page,
@@ -11,8 +11,18 @@ import {
 } from "@shopify/polaris";
 
 export function TranslationDefinitionMissing() {
-    const fetcher = useFetcher();
+    const fetcher = useFetcher<any>();
     const [showInitModal, setShowInitModal] = useState(false);
+    const [isReloading, setIsReloading] = useState(false);
+
+    useEffect(() => {
+        if (fetcher.state === 'idle' && fetcher.data?.success) {
+            setIsReloading(true);
+            setTimeout(() => {
+                window.location.reload();
+            }, 1500);
+        }
+    }, [fetcher.state, fetcher.data]);
 
     return (
         <Frame>
@@ -21,16 +31,19 @@ export function TranslationDefinitionMissing() {
                     <Layout.Section>
                         <Card>
                             <EmptyState
-                                heading="Start translating your store"
+                                heading={isReloading ? "Reloading workspace..." : "Start translating your store"}
                                 action={{
-                                    content: 'Initialize translations',
+                                    content: isReloading ? 'Completing Setup...' : 'Initialize translations',
                                     onAction: () => setShowInitModal(true),
-                                    loading: fetcher.state === "submitting",
+                                    loading: fetcher.state === "submitting" || isReloading,
+                                    disabled: isReloading,
                                 }}
                                 image="https://cdn.shopify.com/s/files/1/0262/4071/2726/files/emptystate-files.png"
                             >
                                 <p>
-                                    Create your translation definition to unlock multilingual support and reach more customers worldwide.
+                                    {isReloading 
+                                        ? "Your translation definitions have been created! Just waiting a moment for Shopify to finalize the changes..." 
+                                        : "Create your translation definition to unlock multilingual support and reach more customers worldwide."}
                                 </p>
                             </EmptyState>
                         </Card>
@@ -61,7 +74,7 @@ export function TranslationDefinitionMissing() {
                 >
                     <Modal.Section>
                         <Text as="p">
-                            This action will create a new Metaobject Definition called <strong>Translation Apply</strong> (<code>translation_apply</code>).
+                            This action will create a new Metaobject Definition called <strong>Text Pilot App</strong> (<code>_text_pilot_app</code>).
                         </Text>
                         <Text as="p">
                             This definition is required to store your language configurations and translations. Do you want to proceed?

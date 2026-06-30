@@ -15,6 +15,9 @@ import {
     Frame,
     Autocomplete,
     Icon,
+    Box,
+    Select,
+    BlockStack
 } from "@shopify/polaris";
 import { DeleteIcon, PlusIcon, SearchIcon } from "@shopify/polaris-icons";
 import { authenticate } from "../shopify.server";
@@ -24,13 +27,17 @@ import {
     deleteMetaobject,
     hasMetaobjectDefinition,
     createMetaobjectDefinition,
+    fetchMetaobjectById,
+    updateMetaobjectTranslation
 } from "../utils/transaltionUpdate";
+import { flattenObject } from "../utils/csvSyncUtils";
 import { TranslationDefinitionMissing } from "../component/TranslationDefinitionMissing";
 
 type Definition = {
     id: string;
     locale: { jsonValue: string };
     language: { jsonValue: string };
+    total_translations?: { value: string };
 };
 
 export const LANGUAGES = [
@@ -147,17 +154,25 @@ export async function action({ request }: ActionFunctionArgs) {
         if (intent === "create") {
             const locale = formData.get("locale") as string;
             const language = formData.get("language") as string;
-            await createMetaobject(admin, { locale, language });
+            const syncSourceId = formData.get("syncSourceId") as string | null;
+
+            if (syncSourceId) {
+                const sourceMetaobject = await fetchMetaobjectById(admin, syncSourceId);
+                const flatSource = flattenObject(sourceMetaobject.translation?.jsonValue ?? {});
+
+                const newTranslation: Record<string, string> = {};
+                for (const key of Object.keys(flatSource)) {
+                    newTranslation[key] = "";
+                }
+
+                const metaobject = await createMetaobject(admin, { locale, language });
+                await updateMetaobjectTranslation(admin, metaobject.id, newTranslation);
+            } else {
+                await createMetaobject(admin, { locale, language });
+            }
+
             return { success: true, message: "Language definition created" };
         }
-
-        // if (intent === "update") {
-        //     const id = formData.get("id") as string;
-        //     const locale = formData.get("locale") as string;
-        //     const language = formData.get("language") as string;
-        //     await updateMetaobjectFields(admin, id, { locale, language });
-        //     return { success: true, message: "Language definition updated" };
-        // }
 
         if (intent === "delete") {
             const id = formData.get("id") as string;
@@ -183,6 +198,11 @@ export default function AppDefinition() {
     const [deleteId, setDeleteId] = useState<string | null>(null);
     const [toastContent, setToastContent] = useState<string | null>(null);
     const [isError, setIsError] = useState(false);
+
+    // Sync Modal State
+    const [syncModalOpen, setSyncModalOpen] = useState(false);
+    const [selectedSyncSource, setSelectedSyncSource] = useState("");
+
     const getOptions = useCallback((searchValue: string = "") => {
         const existingLocales = new Set(definitions.map(d => d.locale.jsonValue));
         const formatOption = (lang: typeof LANGUAGES[0]) => {
@@ -218,7 +238,7 @@ export default function AppDefinition() {
     const updateSelection = useCallback((selected: string[]) => {
         const selectedValue = selected[0];
         const matchedOption = LANGUAGES.find(lang => lang.code === selectedValue);
-        
+
         if (matchedOption) {
             setInputValue(`${matchedOption.label} (${matchedOption.code})`);
             setLocaleCode(matchedOption.code);
@@ -238,23 +258,13 @@ export default function AppDefinition() {
                 setIsError(false);
                 closeModal();
                 setDeleteId(null);
+                setSyncModalOpen(false);
             } else if (fetcher.data.error) {
                 setToastContent(fetcher.data.error);
                 setIsError(true);
             }
         }
     }, [fetcher.state, fetcher.data]);
-
-    const handleEdit = (def: Definition) => {
-        setIsEdit(true);
-        setActiveId(def.id);
-        setLanguageName(def.language.jsonValue);
-        setLocaleCode(def.locale.jsonValue);
-        const match = LANGUAGES.find(l => l.code === def.locale.jsonValue);
-        setInputValue(match ? `${match.label} (${match.code})` : def.locale.jsonValue);
-        setOptions(getOptions(""));
-        setModalOpen(true);
-    };
 
     const handleCreate = () => {
         setIsEdit(false);
@@ -286,11 +296,24 @@ export default function AppDefinition() {
     };
 
     const handleSubmit = () => {
+        const existingWithTranslations = definitions.filter(d => parseInt(d.total_translations?.value || "0", 10) > 0);
+
+        if (existingWithTranslations.length > 0 && !isEdit) {
+            setSelectedSyncSource(existingWithTranslations[0].id);
+            setSyncModalOpen(true);
+            setModalOpen(false);
+        } else {
+            executeSubmit();
+        }
+    };
+
+    const executeSubmit = (syncSourceId?: string) => {
         const formData = {
             intent: isEdit ? "update" : "create",
             language: languageName,
             locale: localeCode,
-            ...(isEdit && { id: activeId })
+            ...(isEdit && { id: activeId }),
+            ...(syncSourceId && { syncSourceId })
         };
         fetcher.submit(formData, { method: "post" });
     };
@@ -315,7 +338,6 @@ export default function AppDefinition() {
                 <IndexTable.Cell>{locale.jsonValue}</IndexTable.Cell>
                 <IndexTable.Cell>
                     <InlineStack gap="200">
-                        {/* <Button icon={EditIcon} onClick={() => handleEdit({ id, language, locale })} variant="plain" /> */}
                         <Button icon={DeleteIcon} tone="critical" onClick={() => handleDelete(id)} variant="plain" />
                     </InlineStack>
                 </IndexTable.Cell>
@@ -337,6 +359,13 @@ export default function AppDefinition() {
             autoComplete="off"
         />
     );
+
+    const syncOptions = definitions
+        .filter(d => parseInt(d.total_translations?.value || "0", 10) > 0)
+        .map(d => ({
+            label: `${d.language.jsonValue} (${d.total_translations?.value} keys)`,
+            value: d.id
+        }));
 
     return (
         <Frame>
@@ -369,7 +398,6 @@ export default function AppDefinition() {
                             ) : (
                                 <EmptyState
                                     heading="No languages defined"
-                                    // action={{ content: 'Add Definition', onAction: handleCreate }}
                                     image="https://cdn.shopify.com/s/files/1/0262/4071/2726/files/emptystate-files.png"
                                 >
                                     <p>Define supported languages and locales for your application.</p>
@@ -378,7 +406,6 @@ export default function AppDefinition() {
                         </Card>
                     </Layout.Section>
                 </Layout>
-
 
                 <Modal
                     open={modalOpen}
@@ -412,6 +439,51 @@ export default function AppDefinition() {
                                 preferredPosition="below"
                             />
                         </FormLayout>
+                    </Modal.Section>
+                </Modal>
+
+                <Modal
+                    open={syncModalOpen}
+                    onClose={() => {
+                        setSyncModalOpen(false);
+                        setModalOpen(true); // Re-open the main modal if they cancel sync
+                    }}
+                    title="Sync Translation Keys"
+                    primaryAction={{
+                        content: "Sync and Create",
+                        onAction: () => executeSubmit(selectedSyncSource),
+                        loading: fetcher.state === "submitting",
+                        disabled: !selectedSyncSource
+                    }}
+                    secondaryActions={[
+                        {
+                            content: "Skip & Create Empty",
+                            onAction: () => executeSubmit(),
+                            disabled: fetcher.state === "submitting"
+                        },
+                        {
+                            content: "Cancel",
+                            onAction: () => {
+                                setSyncModalOpen(false);
+                                setModalOpen(true);
+                            },
+                            disabled: fetcher.state === "submitting"
+                        }
+                    ]}
+                >
+                    <Modal.Section>
+                        <BlockStack gap="400">
+                            <Text as="p">
+                                Do you want to sync the translation keys from an existing language?
+                                This will only copy the keys, not the translated values.
+                            </Text>
+                            <Select
+                                label="Select language to sync from"
+                                options={syncOptions}
+                                value={selectedSyncSource}
+                                onChange={setSelectedSyncSource}
+                            />
+                        </BlockStack>
                     </Modal.Section>
                 </Modal>
 
