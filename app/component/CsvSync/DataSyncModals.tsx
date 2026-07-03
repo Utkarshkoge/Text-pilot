@@ -49,7 +49,9 @@ export function DataSyncModals({
         }
     };
 
-    const nodesToSync = availableNodes.filter(n => n.id !== currentLanguageId);
+    const nodesToSync = availableNodes.filter(
+        n => n.id !== currentLanguageId && Number(n.total_translations?.value || 0) > 0
+    );
 
     return (
         <>

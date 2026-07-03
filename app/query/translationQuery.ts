@@ -1,6 +1,6 @@
 export const AUTHORS_QUERY = `#graphql
   query Authors {
-    metaobjects(type: "_text_pilot_app", first: 250) {
+    metaobjects(type: "_text_pilot_app", first: 250, reverse:true) {
       nodes {
         id
         locale: field(key: "locale") {

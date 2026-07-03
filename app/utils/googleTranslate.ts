@@ -80,42 +80,7 @@ export async function translateText(
   } catch (_) { }
 
   // ---------------------------------------------------------------------------
-  // 4️⃣ MyMemory Translation API (free daily limits)
-  // ---------------------------------------------------------------------------
-  try {
-    const source = "en";
-
-    // Skip if source and target are the same
-    if (source !== target) {
-      const url =
-        `https://api.mymemory.translated.net/get?q=${encodeURIComponent(
-          cleanText,
-        )}&langpair=${source}|${target}`;
-
-      const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), 10000);
-
-      try {
-        const response = await fetch(url, {
-          signal: controller.signal,
-        });
-
-        if (response.ok) {
-          const data: any = await response.json();
-          const translated = data?.responseData?.translatedText;
-
-          if (isValid(translated)) {
-            return translated;
-          }
-        }
-      } finally {
-        clearTimeout(timer);
-      }
-    }
-  } catch (_) { }
-
-  // ---------------------------------------------------------------------------
-  // 5️⃣ Lingva Translate (community-hosted Google proxy)
+  // 4️⃣ Lingva Translate (community-hosted Google proxy)
   // ---------------------------------------------------------------------------
   try {
     const lingvaUrl =
@@ -165,9 +130,13 @@ export async function batchTranslateText(
 
   const CHUNK_SIZE = 5;
 
-  // ✅ remove empty + deduplicate
+  // ✅ remove empty + deduplicate and trim each text strictly
   const uniqueTexts = [
-    ...new Set(texts.filter((t) => typeof t === "string" && t.trim())),
+    ...new Set(
+      texts
+        .map((t) => (typeof t === "string" ? t.trim() : ""))
+        .filter(Boolean)
+    ),
   ];
 
   const result: Record<string, string> = {};
@@ -179,10 +148,15 @@ export async function batchTranslateText(
       chunk.map(async (text) => {
         try {
           const translated = await translateText(text, targetLang);
-          result[text] = translated;
+          // If translation is missing or equals the original key/text, keep it blank
+          if (!translated || translated.trim() === text) {
+            result[text] = "";
+          } else {
+            result[text] = translated;
+          }
         } catch (error) {
           console.error(`Translation error for text "${text}":`, error);
-          result[text] = text; // Fallback to original text if translation fails
+          result[text] = ""; // Keep blank if translation fails
         }
       }),
     );
@@ -190,3 +164,4 @@ export async function batchTranslateText(
 
   return result;
 }
+

@@ -22,7 +22,7 @@ export function useCsvImport({ currentTranslation, onImportConfirm }: UseCsvImpo
     const [csvPreviewData, setCsvPreviewData] = useState<CsvPreviewItem[]>([]);
     const [csvValidationErrors, setCsvValidationErrors] = useState<string[]>([]);
     const [csvPreviewFilter, setCsvPreviewFilter] = useState<'valid' | 'duplicate'>('valid');
-    
+
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const openImportModal = useCallback(() => setImportModalActive(true), []);
@@ -31,7 +31,7 @@ export function useCsvImport({ currentTranslation, onImportConfirm }: UseCsvImpo
 
     const processCsvText = useCallback((text: string, mode: ImportMode) => {
         if (!mode) return;
-        
+
         const rows = parseCsv(text);
         const errors: string[] = [];
         const preview: CsvPreviewItem[] = [];
@@ -68,23 +68,26 @@ export function useCsvImport({ currentTranslation, onImportConfirm }: UseCsvImpo
 
                 if (!key) continue;
 
-                const isSystemDuplicate = currentTranslation?.[key] !== undefined;
-                const isCsvDuplicate = seenKeys.has(key);
-                
+                let isCsvDuplicate = seenKeys.has(key);
+                if (mode === 'keys_only' && currentTranslation && currentTranslation[key] !== undefined) {
+                    isCsvDuplicate = true;
+                }
+
                 seenKeys.add(key);
 
                 preview.push({
                     index: i,
                     key,
                     translation: mode === 'keys_only' ? '' : trans,
-                    status: (isSystemDuplicate || isCsvDuplicate) ? 'Duplicate' : 'New'
+                    status: isCsvDuplicate ? 'Duplicate' : 'New'
                 });
             }
         }
 
         setCsvValidationErrors(errors);
         setCsvPreviewData(preview);
-        setCsvPreviewFilter('valid');
+        const hasDup = preview.some(item => item.status === 'Duplicate');
+        setCsvPreviewFilter(hasDup ? 'duplicate' : 'valid');
         setPreviewModalActive(true);
         setImportModalActive(false);
     }, [currentTranslation]);

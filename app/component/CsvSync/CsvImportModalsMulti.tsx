@@ -6,9 +6,10 @@ import { useCsvImport, ImportMode } from '../../hooks/useCsvImport';
 interface CsvImportModalsProps {
     currentTranslation: Record<string, string> | null;
     onImportConfirm: (updates: Record<string, string>) => void;
+    buttonText?: string;
 }
 
-export function CsvImportModals({ currentTranslation, onImportConfirm }: CsvImportModalsProps) {
+export function CsvImportModals({ currentTranslation, onImportConfirm, buttonText = 'Import' }: CsvImportModalsProps) {
     const scrollRef = useRef<HTMLDivElement>(null);
     const {
         importModalActive,
@@ -27,6 +28,8 @@ export function CsvImportModals({ currentTranslation, onImportConfirm }: CsvImpo
         triggerFileInput
     } = useCsvImport({ currentTranslation, onImportConfirm });
 
+    const hasDuplicates = csvPreviewData.some(d => d.status === 'Duplicate');
+
     const handleDownloadTemplate = (mode: ImportMode) => {
         let csv = mode === 'keys_only'
             ? "Key\nWelcome\nAdd to Cart\nCheckout\nSearch"
@@ -44,7 +47,7 @@ export function CsvImportModals({ currentTranslation, onImportConfirm }: CsvImpo
     return (
         <>
             <Button icon={ImportIcon} onClick={openImportModal} disabled={!currentTranslation}>
-                Import
+                {buttonText}
             </Button>
 
             {/* Import Selection Modal */}
@@ -133,11 +136,19 @@ export function CsvImportModals({ currentTranslation, onImportConfirm }: CsvImpo
 
                                 {csvPreviewData.length > 0 && (
                                     <BlockStack gap="200">
-                                        <Banner tone="warning">
-                                            <Text as="p">
-                                                <strong>Duplicate entries (repeated in the CSV or already present in the selected language) will be skipped. Only valid entries will be imported.</strong>
-                                            </Text>
-                                        </Banner>
+                                        {hasDuplicates ? (
+                                            <Banner tone="warning">
+                                                <Text as="p">
+                                                    <strong>Duplicate entries (repeated in the CSV) will be skipped. Only valid entries will be imported.</strong>
+                                                </Text>
+                                            </Banner>
+                                        ) : (
+                                            <Banner tone="info">
+                                                <Text as="p">
+                                                    <strong>Only valid CSV entries will be added.</strong>
+                                                </Text>
+                                            </Banner>
+                                        )}
                                         <ButtonGroup segmented>
                                             <Button
                                                 pressed={csvPreviewFilter === 'valid'}
