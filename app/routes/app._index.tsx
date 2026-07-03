@@ -46,13 +46,13 @@ const highlights = [
   },
   {
     icon: DuplicateIcon,
-    title: "Bulk / Global Update",
-    desc: "Push new keys to all languages at once from the Bulk Update page. Select all or specific languages and apply changes with a real-time progress bar.",
+    title: "Bulk / CSV Update",
+    desc: "Add translation keys across multiple languages at once or import them using a CSV file. Select specific or all languages and track the operation with a real-time progress bar.",
   },
   {
     icon: AutomationIcon,
-    title: "Auto Translate",
-    desc: "Enable Auto Translate when adding keys and the app automatically calls Google Translate to fill in values for each locale - works globally and per-language.",
+    title: "Free Auto Translation",
+    desc: "Enable Free Auto Translation to automatically generate translations for new keys. Works in both global and per-language translation management.",
   },
   {
     icon: CodeIcon,

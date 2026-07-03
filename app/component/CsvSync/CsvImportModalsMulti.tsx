@@ -1,15 +1,16 @@
 import { useRef } from 'react';
-import { Modal, BlockStack, Card, Text, InlineStack, Button, Banner, InlineGrid, ButtonGroup } from '@shopify/polaris';
-import { ImportIcon, ArrowUpIcon, ArrowDownIcon } from '@shopify/polaris-icons';
-import { useCsvImport, ImportMode } from '../../hooks/useCsvImport';
+import { Modal, BlockStack, Card, Text, InlineStack, Button, Banner, InlineGrid, ButtonGroup, Tooltip, Icon } from '@shopify/polaris';
+import { ImportIcon, ArrowUpIcon, ArrowDownIcon, InfoIcon } from '@shopify/polaris-icons';
+import { useCsvImport, ImportMode } from '../../hooks/useCsvImportMulti';
 
 interface CsvImportModalsProps {
     currentTranslation: Record<string, string> | null;
     onImportConfirm: (updates: Record<string, string>) => void;
     buttonText?: string;
+    maxEntries?: number;
 }
 
-export function CsvImportModals({ currentTranslation, onImportConfirm, buttonText = 'Import' }: CsvImportModalsProps) {
+export function CsvImportModals({ currentTranslation, onImportConfirm, buttonText = 'Import', maxEntries }: CsvImportModalsProps) {
     const scrollRef = useRef<HTMLDivElement>(null);
     const {
         importModalActive,
@@ -26,7 +27,7 @@ export function CsvImportModals({ currentTranslation, onImportConfirm, buttonTex
         handleFileSelect,
         handleConfirmImport,
         triggerFileInput
-    } = useCsvImport({ currentTranslation, onImportConfirm });
+    } = useCsvImport({ currentTranslation, onImportConfirm, maxEntries });
 
     const hasDuplicates = csvPreviewData.some(d => d.status === 'Duplicate');
 
@@ -60,8 +61,14 @@ export function CsvImportModals({ currentTranslation, onImportConfirm, buttonTex
                     <BlockStack gap="400">
                         <Card padding="400">
                             <BlockStack gap="200">
-                                <Text as="h3" variant="headingSm">Add Keys Only</Text>
-                                <Text as="p" tone="subdued">Import only translation keys without translated values.</Text>
+                                <InlineStack gap="100" blockAlign="center">
+                                    <Text as="h3" variant="headingSm">Add Keys Only</Text>
+                                    <Tooltip content="The maximum limit is 200, but it will divide as per the total of selected languages.">
+                                        <Icon source={InfoIcon} tone="subdued" />
+                                    </Tooltip>
+                                </InlineStack>
+                                <Text as="p" tone="subdued">Import only translation keys without translated values.{maxEntries !== undefined ? ` (Maximum ${maxEntries} entries)` : ''}</Text>
+
                                 <InlineStack gap="300" blockAlign="center">
                                     <Button onClick={() => triggerFileInput('keys_only')}>Select CSV File</Button>
                                     <Button variant="plain" onClick={() => handleDownloadTemplate('keys_only')}>Download Template</Button>

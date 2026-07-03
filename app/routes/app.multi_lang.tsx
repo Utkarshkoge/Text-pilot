@@ -469,6 +469,7 @@ function MultiLanguageUpdate() {
                                                                         setTimeout(() => scrollContainerRef.current?.scrollTo({ top: 0, behavior: 'smooth' }), 50);
                                                                     }}
                                                                     buttonText="Add via CSV"
+                                                                    maxEntries={Math.ceil(200 / selectedIds.size)}
                                                                 />
                                                             </InlineStack>
                                                         </Box>

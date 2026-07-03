@@ -10,7 +10,7 @@ export function AddDefinitionInstructionsModal({ open, onClose }: Props) {
     <Modal
       open={open}
       onClose={onClose}
-      title="How to Add Tags"
+      title="How to Add Language Definitions"
       primaryAction={{
         content: "Got it",
         onAction: onClose,
@@ -19,86 +19,86 @@ export function AddDefinitionInstructionsModal({ open, onClose }: Props) {
       <Modal.Section>
         <BlockStack gap="300">
           <Text as="p" variant="bodyMd">
-            Follow these simple steps to add tags:
+            Follow these steps to create and manage language definitions:
           </Text>
 
           <List type="number">
             <List.Item>
               <Text as="span">
+                Click{" "}
                 <Text as="span" fontWeight="semibold">
-                  Select the resource type
+                  Add Definition
                 </Text>{" "}
-                you want to update.
+                to create a new language definition.
               </Text>
             </List.Item>
 
             <List.Item>
               <Text as="span">
+                Select the{" "}
                 <Text as="span" fontWeight="semibold">
-                  Enter some tags
+                  language
                 </Text>{" "}
-                you want to add.
+                you want to create.
               </Text>
             </List.Item>
 
             <List.Item>
               <Text as="span">
-                <Text as="span" fontWeight="semibold">
-                  Match the resource
-                </Text>{" "}
-                using Shopify GID or a field from your CSV.
+                Choose one of the available options:
+                <List type="bullet">
+                  <List.Item>
+                    <Text as="span">
+                      <Text as="span" fontWeight="semibold">
+                        Skip &amp; Create
+                      </Text>{" "}
+                      creates an empty language definition without adding any
+                      translation keys.
+                    </Text>
+                  </List.Item>
+                  <List.Item>
+                    <Text as="span">
+                      <Text as="span" fontWeight="semibold">
+                        Sync &amp; Create
+                      </Text>{" "}
+                      copies only the existing translation keys from another
+                      language into the selected language.
+                    </Text>
+                  </List.Item>
+                </List>
               </Text>
             </List.Item>
 
             <List.Item>
               <Text as="span">
+                If you choose{" "}
                 <Text as="span" fontWeight="semibold">
-                  Download the sample CSV
-                </Text>{" "}
-                and make sure your file has the{" "}
-                <Text as="span" fontWeight="semibold">
-                  same format and headers
-                </Text>.
-              </Text>
-            </List.Item>
-
-
-
-            <List.Item>
-              <Text as="span">
-                Upload your CSV file  and click{" "}
-                <Text as="span" fontWeight="semibold">
-                  "Run Bulk Update"
-                </Text>.
-              </Text>
-            </List.Item>
-
-            <List.Item>
-              <Text as="span">
-                A{" "}
+                  Sync &amp; Create
+                </Text>
+                , a{" "}
                 <Text as="span" fontWeight="semibold">
                   preview popup
                 </Text>{" "}
-                will appear - review the data carefully.
+                will appear, allowing you to review the synced keys before saving.
               </Text>
             </List.Item>
 
             <List.Item>
               <Text as="span">
+                After the language is created, you can click the {" "}
                 <Text as="span" fontWeight="semibold">
-                  Confirm the operation
+                  preview
                 </Text>{" "}
-                to start the update.
+                button to view the language.
               </Text>
             </List.Item>
 
             <List.Item>
               <Text as="span">
-                After completion,{" "}
+                To delete a language definition, click the{" "}
                 <Text as="span" fontWeight="semibold">
-                  download the result CSV
-                </Text>{" "}
-                to check the final output.
+                  Remove
+                </Text>{" "}and confirm.
               </Text>
             </List.Item>
           </List>
@@ -122,39 +122,45 @@ export function SingleLanguageInstructionsModal({ open, onClose }: Props) {
       <Modal.Section>
         <BlockStack gap="300">
           <Text as="p" variant="bodyMd">
-            Follow these steps to remove tags from your resources:
+            Follow these steps to manage your language translations:
           </Text>
 
           <List type="number">
             <List.Item>
               <Text as="span">
+                Select the{" "}
                 <Text as="span" fontWeight="semibold">
-                  Select the resource type
+                  language
                 </Text>{" "}
-                you want to update.
+                whose translations you want to manage.
+              </Text>
+            </List.Item>
+            <List.Item>
+              <Text as="span">
+                Add a{" "}
+                <Text as="span" fontWeight="semibold">
+                  translation key
+                </Text>{" "}
+                and click{" "}
+                <Text as="span" fontWeight="semibold">
+                  +Add Key
+                </Text>{" "}
+                then manage their translation.
+              </Text>
+            </List.Item>
+            <List.Item>
+              <Text as="span">
+                Use the{" "}
+                <Text as="span" fontWeight="semibold">
+                  Search bar
+                </Text>{" "}
+                to quickly find translation and key.
               </Text>
             </List.Item>
 
             <List.Item>
               <Text as="span">
-                Apply filters using{" "}
-                <Text as="span" fontWeight="semibold">
-                  Match Type
-                </Text>{" "}
-                to find your tags.
-              </Text>
-            </List.Item>
-
-            <List.Item>
-              <Text as="span">
-                <Text as="span" fontWeight="semibold">
-                  Enter one or more tags
-                </Text>{" "}
-                (use{" "}
-                <Text as="span" fontWeight="semibold">
-                  "Add another tag"
-                </Text>{" "}
-                if needed).
+                Edit existing translations or remove translation keys as needed.
               </Text>
             </List.Item>
 
@@ -162,13 +168,12 @@ export function SingleLanguageInstructionsModal({ open, onClose }: Props) {
               <Text as="span">
                 Click{" "}
                 <Text as="span" fontWeight="semibold">
-                  "Fetch Tags"
+                  Export
                 </Text>{" "}
-                and{" "}
+                to download all translations for the current language in{" "}
                 <Text as="span" fontWeight="semibold">
-                  select the tags
-                </Text>{" "}
-                you want to remove.
+                  CSV format
+                </Text>.
               </Text>
             </List.Item>
 
@@ -176,31 +181,9 @@ export function SingleLanguageInstructionsModal({ open, onClose }: Props) {
               <Text as="span">
                 Use{" "}
                 <Text as="span" fontWeight="semibold">
-                  Global Remove
+                  Sync Translation Keys
                 </Text>{" "}
-                to remove tags from up to 5,000 resources at once.
-              </Text>
-            </List.Item>
-
-            <List.Item>
-              <Text as="span">
-                Or use the  CSV option in{" "}
-                <Text as="span" fontWeight="semibold">
-                  Specific Removal
-                </Text>{" "}
-              </Text>
-            </List.Item>
-
-            <List.Item>
-              <Text as="span">
-                Create your CSV using{" "}
-                <Text as="span" fontWeight="semibold">
-                  Global GID or a specific field
-                </Text>{" "}
-                and ensure it matches the{" "}
-                <Text as="span" fontWeight="semibold">
-                  sample format (headers must match)
-                </Text>.
+                to sync missing keys from another language.
               </Text>
             </List.Item>
 
@@ -208,24 +191,63 @@ export function SingleLanguageInstructionsModal({ open, onClose }: Props) {
               <Text as="span">
                 Click{" "}
                 <Text as="span" fontWeight="semibold">
-                  "Run Remove"
+                  Import
                 </Text>{" "}
-                and review the{" "}
+                and choose one of the available options:
+                <List type="bullet">
+                  <List.Item>
+                    <Text as="span">
+                      <Text as="span" fontWeight="semibold">
+                        Add Keys Only
+                      </Text>{" "}
+                      imports only the translation keys.
+                    </Text>
+                  </List.Item>
+                  <List.Item>
+                    <Text as="span">
+                      <Text as="span" fontWeight="semibold">
+                        Add Keys with Translations
+                      </Text>{" "}
+                      imports both the translation keys and their translations.
+                    </Text>
+                  </List.Item>
+                </List>
+              </Text>
+            </List.Item>
+            <List.Item>
+              <Text as="span">
+                Use the{" "}
                 <Text as="span" fontWeight="semibold">
-                  preview popup
-                </Text>.
+                  Translated
+                </Text>{" "}
+                and{" "}
+                <Text as="span" fontWeight="semibold">
+                  Not Translated
+                </Text>{" "}
+                filters to find entries quickly.
+              </Text>
+            </List.Item>
+            <List.Item>
+              <Text as="span">
+                Click{" "}
+                <Text as="span" fontWeight="semibold">
+                  Auto Translation
+                </Text>{" "}
+                to automatically generate translations for unsaved keys that have blank or missing translations.
               </Text>
             </List.Item>
 
             <List.Item>
               <Text as="span">
+                Click{" "}
                 <Text as="span" fontWeight="semibold">
-                  Confirm the action
-                </Text>, track the progress, and{" "}
-                <Text as="span" fontWeight="semibold">
-                  download the result CSV
+                  Save
                 </Text>{" "}
-                after completion.
+                to save your changes, or click{" "}
+                <Text as="span" fontWeight="semibold">
+                  Discard
+                </Text>{" "}
+                to cancel all unsaved changes.
               </Text>
             </List.Item>
           </List>
@@ -240,7 +262,7 @@ export function MultiLanguageInstructionsModal({ open, onClose }: Props) {
     <Modal
       open={open}
       onClose={onClose}
-      title="How to Manage Metafields"
+      title="How to Manage Multiple Languages"
       primaryAction={{
         content: "Got it",
         onAction: onClose,
@@ -249,133 +271,64 @@ export function MultiLanguageInstructionsModal({ open, onClose }: Props) {
       <Modal.Section>
         <BlockStack gap="300">
           <Text as="p" variant="bodyMd">
-            Follow these steps to manage metafields:
+            Follow these steps to manage translations across multiple languages:
           </Text>
 
           <List type="number">
             <List.Item>
               <Text as="span">
+                Select the{" "}
                 <Text as="span" fontWeight="semibold">
-                  Select the resource type
+                  languages
+                </Text>{" "}
+                in which you want to add translation keys.
+              </Text>
+            </List.Item>
+
+            <List.Item>
+              <Text as="span">
+                Enter a{" "}
+                <Text as="span" fontWeight="semibold">
+                  key name
                 </Text>{" "}
                 and click{" "}
                 <Text as="span" fontWeight="semibold">
-                  "Fetch Metafields"
+                  Add Key
                 </Text>{" "}
-                to load available metafields.
+                for the selected languages.
               </Text>
             </List.Item>
 
             <List.Item>
               <Text as="span">
-                Choose the{" "}
+                You can also import translation keys using the{" "}
                 <Text as="span" fontWeight="semibold">
-                  metafield
+                  Import
                 </Text>{" "}
-                you want to manage.
-              </Text>
-            </List.Item>
-
-            <List.Item>
-              <Text as="span">
-                Select an{" "}
-                operation mode {" : "}
+                button with a{" "}
                 <Text as="span" fontWeight="semibold">
-                  Global Remove
-                </Text>,{" "}
-                <Text as="span" fontWeight="semibold">
-                  Targeted Removal
-                </Text>, or{" "}
-                <Text as="span" fontWeight="semibold">
-                  Bulk Update
+                  CSV file
                 </Text>.
               </Text>
             </List.Item>
 
             <List.Item>
               <Text as="span">
+                Click{" "}
                 <Text as="span" fontWeight="semibold">
-                  Global Remove
+                  Auto Translation
                 </Text>{" "}
-                will remove metafields from up to 5,000 resources at once.
-              </Text>
-            </List.Item>
-
-            {/* 🔥 MERGED FLOW START */}
-            <List.Item>
-              <Text as="span">
-                For{" "}
-                <Text as="span" fontWeight="semibold">
-                  Targeted Removal / Bulk Update
-                </Text>, select a{" "}
-                <Text as="span" fontWeight="semibold">
-                  Match Type
-                </Text>{" "}
-                and create a CSV using{" "}
-                <Text as="span" fontWeight="semibold">
-                  Resource GID / Specific Field
-                </Text>.
+                to automatically generate translations for all keys in the selected languages.
               </Text>
             </List.Item>
 
             <List.Item>
               <Text as="span">
-                Make sure your CSV follows the{" "}
+                Once everything is complete, click{" "}
                 <Text as="span" fontWeight="semibold">
-                  sample format (headers must match exactly)
-                </Text>.
-              </Text>
-            </List.Item>
-
-            <List.Item>
-              <Text as="span">
-                Upload the CSV and click{" "}
-                <Text as="span" fontWeight="semibold">
-                  Run Action (Delete / Update)
-                </Text>. A{" "}
-                <Text as="span" fontWeight="semibold">
-                  preview popup
+                  Preview
                 </Text>{" "}
-                will appear.
-              </Text>
-            </List.Item>
-
-            <List.Item>
-              <Text as="span">
-                After{" "}
-                <Text as="span" fontWeight="semibold">
-                  confirming the action
-                </Text>, you can track the{" "}
-                <Text as="span" fontWeight="semibold">
-                  live progress
-                </Text>.
-              </Text>
-            </List.Item>
-
-            <List.Item>
-              <Text as="span">
-                Once completed,{" "}
-                <Text as="span" fontWeight="semibold">
-                  download the result CSV
-                </Text>{" "}
-                to review the output.
-              </Text>
-            </List.Item>
-            {/* 🔥 MERGED FLOW END */}
-            <List.Item>
-              <Text as="span">
-                Shopify also supports{" "}
-                <Text as="span" fontWeight="semibold">
-                  List metafields
-                </Text>. For this, you get an extra option called{" "}
-                <Text as="span" fontWeight="semibold">
-                  "List Strategy"
-                </Text>{" "}
-                where you can{" "}
-                <Text as="span" fontWeight="semibold">
-                  add or remove specific values
-                </Text>{" "}
-                instead of updating the full list.
+                to review the changes.
               </Text>
             </List.Item>
           </List>
