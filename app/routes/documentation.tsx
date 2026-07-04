@@ -1,6 +1,6 @@
 import React from 'react';
 const APP_NAME = "Text Pilot";
-const COMPANY_NAME = "Galaxy Web Links";
+const COMPANY_NAME = "Galaxy WebLinks";
 import { MetaFunction } from 'react-router';
 
 export const meta: MetaFunction = () => [

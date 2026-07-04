@@ -24,7 +24,7 @@ export default function App() {
       <PolarisAppProvider i18n={translations}>
         <s-app-nav>
           <s-link href="/app/lang">Single Language</s-link>
-          <s-link href="/app/multi_lang">Multiple Language</s-link>
+          <s-link href="/app/multi_lang">Multiple Languages</s-link>
           <s-link href="/app/definition">Manage Definitions</s-link>
           <s-link href="/app/guide">Developer Guide</s-link>
 

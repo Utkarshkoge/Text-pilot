@@ -1,7 +1,7 @@
 import React from 'react';
 import { MetaFunction } from 'react-router';
 const APP_NAME = "Text Pilot";
-const COMPANY_NAME = "Galaxy Web Links";
+const COMPANY_NAME = "Galaxy WebLinks";
 
 export const meta: MetaFunction = () => [
     { title: `FAQ | ${APP_NAME}` },

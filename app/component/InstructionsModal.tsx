@@ -27,7 +27,7 @@ export function AddDefinitionInstructionsModal({ open, onClose }: Props) {
               <Text as="span">
                 Click{" "}
                 <Text as="span" fontWeight="semibold">
-                  Add Definition
+                  Add Language
                 </Text>{" "}
                 to create a new language definition.
               </Text>

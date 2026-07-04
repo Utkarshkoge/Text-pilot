@@ -28,9 +28,15 @@ import { authenticate } from "../shopify.server";
 import { RouteErrorBoundary } from "app/component/RouteErrorBoundary";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-  await authenticate.admin(request);
-  return null;
+  try {
+    await authenticate.admin(request);
+    return null;
+  } catch (error) {
+    console.error("Error in app._index loader:", error);
+    throw error;
+  }
 };
+
 
 // ─── Feature highlights shown in the info section ────────────────────────────
 const highlights = [
@@ -79,9 +85,9 @@ const actions = [
   },
   {
     icon: DuplicateIcon,
-    title: "Multiple Language",
+    title: "Multiple Languages",
     desc: "Define keys once and apply them across all selected languages simultaneously, with optional auto-translate.",
-    label: "Multiple Language",
+    label: "Multiple Languages",
     route: "/app/multi_lang",
     badge: null,
   },

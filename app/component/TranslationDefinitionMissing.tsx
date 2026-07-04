@@ -10,7 +10,7 @@ import {
     Text,
 } from "@shopify/polaris";
 
-export function TranslationDefinitionMissing() {
+export function TranslationDefinitionMissing({ pagename }: { pagename: string }) {
     const fetcher = useFetcher<any>();
     const [showInitModal, setShowInitModal] = useState(false);
     const [isReloading, setIsReloading] = useState(false);
@@ -26,14 +26,14 @@ export function TranslationDefinitionMissing() {
 
     return (
         <Frame>
-            <Page title="Translation Definitions">
+            <Page title={pagename}>
                 <Layout>
                     <Layout.Section>
                         <Card>
                             <EmptyState
-                                heading={isReloading ? "Reloading workspace..." : "Start translating your store"}
+                                heading={isReloading ? "Reloading workspace..." : "Start managing translations"}
                                 action={{
-                                    content: isReloading ? 'Completing Setup...' : 'Initialize translations',
+                                    content: isReloading ? 'Completing Setup...' : 'Create Translation Metaobject',
                                     onAction: () => setShowInitModal(true),
                                     loading: fetcher.state === "submitting" || isReloading,
                                     disabled: isReloading,
@@ -41,9 +41,9 @@ export function TranslationDefinitionMissing() {
                                 image="https://cdn.shopify.com/s/files/1/0262/4071/2726/files/emptystate-files.png"
                             >
                                 <p>
-                                    {isReloading 
-                                        ? "Your translation definitions have been created! Just waiting a moment for Shopify to finalize the changes..." 
-                                        : "Create your translation definition to unlock multilingual support and reach more customers worldwide."}
+                                    {isReloading
+                                        ? "Your metaobject have been created! Just waiting a moment for Shopify to finalize the changes..."
+                                        : "Create the metaobject to securely store and manage translation data for your Hydrogen storefront."}
                                 </p>
                             </EmptyState>
                         </Card>
@@ -52,9 +52,9 @@ export function TranslationDefinitionMissing() {
                 <Modal
                     open={showInitModal}
                     onClose={() => setShowInitModal(false)}
-                    title="Initialize Translations"
+                    title="Create Translation Metaobject"
                     primaryAction={{
-                        content: 'Create Definition',
+                        content: 'Create',
                         onAction: () => {
                             // Submit to the definition route which handles this intent
                             fetcher.submit(
@@ -74,10 +74,7 @@ export function TranslationDefinitionMissing() {
                 >
                     <Modal.Section>
                         <Text as="p">
-                            This action will create a new Metaobject Definition called <strong>Text Pilot App</strong> (<code>_text_pilot_app</code>).
-                        </Text>
-                        <Text as="p">
-                            This definition is required to store your language configurations and translations. Do you want to proceed?
+                            Create a new metaobject called <strong>"Text Pilot App"</strong>  to securely store and manage all translation data in your shopify store.
                         </Text>
                     </Modal.Section>
                 </Modal>
