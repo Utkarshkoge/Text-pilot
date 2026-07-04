@@ -38,6 +38,12 @@ import { SingleLanguageInstructionsModal } from 'app/component/InstructionsModal
 import { loader } from 'app/routes/app.lang';
 import { flattenObject } from 'app/utils/csvSyncUtils';
 
+function processIncomingTranslation(flat: Record<string, string>): Record<string, string> {
+    const cleaned = { ...flat };
+    delete cleaned["__keys_order__"];
+    return cleaned;
+}
+
 export function SingleLanguageUpdate() {
     const { nodes: rawNodes } = useLoaderData<typeof loader>();
     console.log(rawNodes, '......json');
@@ -108,7 +114,8 @@ export function SingleLanguageUpdate() {
     const filteredTranslations = useMemo(() => {
         if (!translation) return null;
 
-        let entries = Object.entries(translation);
+        let entries = Object.keys(translation)
+            .map(key => [key, translation[key]] as [string, string]);
 
         if (translationFilter === 'translated') {
             entries = entries.filter(([, value]) => value.trim() !== '');
@@ -246,7 +253,6 @@ export function SingleLanguageUpdate() {
                 operation: 'submit_changes',
                 metaobjectId: selectedId,
                 updatesToMerge: JSON.stringify(updatesToMerge),
-                orderedKeys: JSON.stringify(Object.keys(finalTranslation)),
             },
             { method: 'post' }
         );
@@ -284,9 +290,10 @@ export function SingleLanguageUpdate() {
         if ('updatedMetaoTranslation' in fetcher.data) {
             const updated = (fetcher.data as any).updatedMetaoTranslation?.translation?.jsonValue ?? {};
             const flat = flattenObject(updated);
+            const cleaned = processIncomingTranslation(flat);
 
-            setTranslation(flat);
-            setOriginalTranslation(flat);
+            setTranslation(cleaned);
+            setOriginalTranslation(cleaned);
             setIsDirty(false);
             setAutoTranslate(false);
             inputBufferRef.current = {};
@@ -303,8 +310,9 @@ export function SingleLanguageUpdate() {
         if ('syncSourceTranslation' in fetcher.data) {
             const sourceJson = (fetcher.data as any).syncSourceTranslation || {};
             const sourceFlat = flattenObject(sourceJson);
+            const cleaned = processIncomingTranslation(sourceFlat);
             if (syncResolverRef.current) {
-                syncResolverRef.current(sourceFlat);
+                syncResolverRef.current(cleaned);
                 syncResolverRef.current = null;
             }
             return;
@@ -313,8 +321,9 @@ export function SingleLanguageUpdate() {
         if ('Translation' in fetcher.data) {
             const translationJson = (fetcher.data as any).Translation || {};
             const flat = flattenObject(translationJson);
-            setTranslation(flat);
-            setOriginalTranslation(flat);
+            const cleaned = processIncomingTranslation(flat);
+            setTranslation(cleaned);
+            setOriginalTranslation(cleaned);
             inputBufferRef.current = {};
         }
     }, [fetcher.data]);
@@ -352,7 +361,7 @@ export function SingleLanguageUpdate() {
                     open={((fetcher.state === 'submitting' && fetcher.formData?.get('operation') === 'submit_changes') || isTranslating)}
                     onClose={() => { }}
                     title={isTranslating ? "Auto Translating Keys" : "Saving Changes"}
-                    small
+                    size="small"
                 >
                     <Modal.Section>
                         <BlockStack gap="400" align="center" inlineAlign="center">
@@ -517,28 +526,28 @@ export function SingleLanguageUpdate() {
                                                         prefix={<Icon source={SearchIcon} />}
                                                     />
                                                 </div>
-                                                <ButtonGroup segmented>
+                                                <ButtonGroup variant="segmented">
                                                     <Button
                                                         pressed={translationFilter === 'all'}
                                                         onClick={() => {
                                                             setTranslationFilter('all');
                                                             setTimeout(() => scrollContainerRef.current?.scrollTo({ top: 0, behavior: 'smooth' }), 50);
                                                         }}
-                                                    >All {" "}</Button>
+                                                    >All </Button>
                                                     <Button
                                                         pressed={translationFilter === 'translated'}
                                                         onClick={() => {
                                                             setTranslationFilter('translated');
                                                             setTimeout(() => scrollContainerRef.current?.scrollTo({ top: 0, behavior: 'smooth' }), 50);
                                                         }}
-                                                    >Translated ({translatedCount})</Button>
+                                                    >{`Translated (${translatedCount})`}</Button>
                                                     <Button
                                                         pressed={translationFilter === 'not_translated'}
                                                         onClick={() => {
                                                             setTranslationFilter('not_translated');
                                                             setTimeout(() => scrollContainerRef.current?.scrollTo({ top: 0, behavior: 'smooth' }), 50);
                                                         }}
-                                                    >Not Translated ({notTranslatedCount})</Button>
+                                                    >{`Not Translated (${notTranslatedCount})`}</Button>
                                                 </ButtonGroup>
                                             </InlineStack>
                                             <InlineStack gap="300" blockAlign="center">
@@ -623,6 +632,7 @@ export function SingleLanguageUpdate() {
                                                                             <Checkbox
                                                                                 label="Enable auto-translation for new keys"
                                                                                 checked={autoTranslate}
+                                                                                disabled={newlyAddedCount === 0 || newlyAddedCount > 200}
                                                                                 onChange={(v) => {
                                                                                     if (v) {
                                                                                         setShowAutoTranslateConfirmModal(true);
@@ -637,7 +647,7 @@ export function SingleLanguageUpdate() {
                                                                         <BlockStack gap="100">
                                                                             <Banner tone="warning">
                                                                                 <Text as="p">
-                                                                                    <strong>Auto Translate</strong> uses a free translation service. Please verify the generated translations before using them. The <strong>Key Name</strong> will be used as the source text.
+                                                                                    <strong>Auto Translate</strong> uses a free translation service. Please verify the generated translations before using them. Available only for 200 new keys.
                                                                                 </Text>
                                                                             </Banner>
 
@@ -646,7 +656,7 @@ export function SingleLanguageUpdate() {
                                                                 </BlockStack>
                                                             </Card>
                                                             {/* Key Management Section */}
-                                                            <AddRootContent onAddKey={addRootKey} />
+                                                            <AddRootContent onAddKey={addRootKey} disabled={newlyAddedCount >= 200} />
                                                         </BlockStack>
                                                     </Box>
                                                 </Box>

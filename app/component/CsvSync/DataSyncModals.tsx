@@ -145,15 +145,15 @@ export function DataSyncModals({
                                 <Banner tone="info">
                                     <Text as="p"><strong>Duplicate entries will be ignored. Only valid keys will be added.</strong></Text>
                                 </Banner>
-                                <ButtonGroup segmented>
+                                <ButtonGroup variant="segmented">
                                     <Button
                                         pressed={syncPreviewFilter === 'valid'}
                                         onClick={() => setSyncPreviewFilter('valid')}
-                                    >Valid Entries ({syncPreviewData.filter(d => d.status === 'New').length})</Button>
+                                    >{`Valid Entries (${syncPreviewData.filter(d => d.status === 'New').length})`}</Button>
                                     <Button
                                         pressed={syncPreviewFilter === 'duplicate'}
                                         onClick={() => setSyncPreviewFilter('duplicate')}
-                                    >Duplicate Entries ({syncPreviewData.filter(d => d.status === 'Duplicate').length})</Button>
+                                    >{`Duplicate Entries (${syncPreviewData.filter(d => d.status === 'Duplicate').length})`}</Button>
                                 </ButtonGroup>
                                 <div style={{ position: 'relative' }}>
                                     {/* Header Row (Keys Only Format) */}
@@ -175,13 +175,8 @@ export function DataSyncModals({
                                                         <div style={{ width: '10%' }}>
                                                             <Text as="span" variant="bodySm" tone="subdued">{item.index + 1}</Text>
                                                         </div>
-                                                        <div style={{ width: '70%', paddingRight: '10px' }}>
+                                                        <div style={{ width: '90%', paddingRight: '10px' }}>
                                                             <Text as="span" variant="bodyMd" fontWeight="bold" breakWord>{item.key}</Text>
-                                                        </div>
-                                                        <div style={{ width: '20%' }}>
-                                                            <Text as="span" variant="bodyMd" tone="subdued" breakWord>
-                                                                {/* Sync does not copy translations */}
-                                                            </Text>
                                                         </div>
                                                     </div>
                                                 ))}

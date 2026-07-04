@@ -70,7 +70,7 @@ export const TranslationRow = memo(({
 });
 TranslationRow.displayName = 'TranslationRow';
 
-export const AddRootContent = memo(({ onAddKey }: { onAddKey: (k: string) => void }) => {
+export const AddRootContent = memo(({ onAddKey, disabled }: { onAddKey: (k: string) => void; disabled?: boolean }) => {
     const [key, setKey] = useState('');
 
     return (
@@ -78,20 +78,21 @@ export const AddRootContent = memo(({ onAddKey }: { onAddKey: (k: string) => voi
             <BlockStack gap="100">
                 <Text variant="headingSm" as="h3">Add New Key</Text>
                 <div onKeyDown={(e: React.KeyboardEvent) => {
-                    if (e.key === 'Enter' && key.trim()) {
+                    if (e.key === 'Enter' && key.trim() && !disabled) {
                         onAddKey(key.trim());
                         setKey('');
                     }
                 }}>
                     <TextField
                         label=""
-                        placeholder="e.g. welcome_message"
+                        placeholder={disabled ? "Disable add key (Limit of 200 new keys is reached)" : "e.g. welcome_message"}
                         value={key}
                         onChange={setKey}
                         autoComplete="off"
+                        disabled={disabled}
                         connectedRight={
-                            <Button icon={PlusIcon} onClick={() => {
-                                if (key.trim()) {
+                            <Button icon={PlusIcon} disabled={disabled} onClick={() => {
+                                if (key.trim() && !disabled) {
                                     onAddKey(key.trim());
                                     setKey('');
                                 }

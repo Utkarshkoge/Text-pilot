@@ -150,6 +150,15 @@ export function SingleLanguageInstructionsModal({ open, onClose }: Props) {
             </List.Item>
             <List.Item>
               <Text as="span">
+                You can add up to{" "}
+                <Text as="span" fontWeight="semibold">
+                  200 new keys
+                </Text>{" "}
+                at a time.
+              </Text>
+            </List.Item>
+            <List.Item>
+              <Text as="span">
                 Use the{" "}
                 <Text as="span" fontWeight="semibold">
                   Search bar
@@ -296,6 +305,15 @@ export function MultiLanguageInstructionsModal({ open, onClose }: Props) {
                   Add Key
                 </Text>{" "}
                 for the selected languages.
+              </Text>
+            </List.Item>
+            <List.Item>
+              <Text as="span">
+                You can add up to{" "}
+                <Text as="span" fontWeight="semibold">
+                  200 keys
+                </Text>{" "}
+                at a time. If multiple languages are selected, this limit is divided equally among all selected languages.
               </Text>
             </List.Item>
 

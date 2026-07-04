@@ -8,9 +8,10 @@ interface CsvImportModalsProps {
     onImportConfirm: (updates: Record<string, string>) => void;
     buttonText?: string;
     maxEntries?: number;
+    disabled?: boolean;
 }
 
-export function CsvImportModals({ currentTranslation, onImportConfirm, buttonText = 'Import', maxEntries }: CsvImportModalsProps) {
+export function CsvImportModals({ currentTranslation, onImportConfirm, buttonText = 'Import', maxEntries, disabled }: CsvImportModalsProps) {
     const scrollRef = useRef<HTMLDivElement>(null);
     const {
         importModalActive,
@@ -47,7 +48,7 @@ export function CsvImportModals({ currentTranslation, onImportConfirm, buttonTex
 
     return (
         <>
-            <Button icon={ImportIcon} onClick={openImportModal} disabled={!currentTranslation}>
+            <Button icon={ImportIcon} onClick={openImportModal} disabled={disabled || !currentTranslation}>
                 {buttonText}
             </Button>
 
@@ -156,15 +157,15 @@ export function CsvImportModals({ currentTranslation, onImportConfirm, buttonTex
                                                 </Text>
                                             </Banner>
                                         )}
-                                        <ButtonGroup segmented>
+                                        <ButtonGroup variant="segmented">
                                             <Button
                                                 pressed={csvPreviewFilter === 'valid'}
                                                 onClick={() => setCsvPreviewFilter('valid')}
-                                            >Valid Entries ({csvPreviewData.filter(d => d.status === 'New').length})</Button>
+                                            >{`Valid Entries (${csvPreviewData.filter(d => d.status === 'New').length})`}</Button>
                                             <Button
                                                 pressed={csvPreviewFilter === 'duplicate'}
                                                 onClick={() => setCsvPreviewFilter('duplicate')}
-                                            >Duplicate Entries ({csvPreviewData.filter(d => d.status === 'Duplicate').length})</Button>
+                                            >{`Duplicate Entries (${csvPreviewData.filter(d => d.status === 'Duplicate').length})`}</Button>
                                         </ButtonGroup>
                                         <div style={{ position: 'relative' }}>
                                             {/* Header Row */}

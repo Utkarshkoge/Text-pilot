@@ -58,25 +58,6 @@ export function useCsvImport({ currentTranslation, onImportConfirm, maxEntries }
         }
 
         if (errors.length === 0) {
-            let totalEntries = 0;
-            for (let i = 1; i < rows.length; i++) {
-                const row = rows[i];
-                if (row.length === 0 || (row.length === 1 && row[0].trim() === '')) {
-                    continue;
-                }
-                const key = row[keyIndex] ? row[keyIndex].trim() : '';
-                if (key) {
-                    totalEntries++;
-                }
-            }
-
-            const limit = maxEntries !== undefined ? maxEntries : 200;
-            if (totalEntries > limit) {
-                errors.push(`The CSV file contains ${totalEntries} entries, which exceeds the maximum limit of ${limit} entries allowed.`);
-            }
-        }
-
-        if (errors.length === 0) {
             for (let i = 1; i < rows.length; i++) {
                 const row = rows[i];
                 if (row.length === 0 || (row.length === 1 && row[0].trim() === '')) {
@@ -101,6 +82,14 @@ export function useCsvImport({ currentTranslation, onImportConfirm, maxEntries }
                     translation: mode === 'keys_only' ? '' : trans,
                     status: isCsvDuplicate ? 'Duplicate' : 'New'
                 });
+            }
+
+            const currentCount = currentTranslation ? Object.keys(currentTranslation).length : 0;
+            const limit = maxEntries !== undefined ? maxEntries : 200;
+            const newKeysCount = preview.filter(item => item.status === 'New').length;
+
+            if (currentCount + newKeysCount > limit) {
+                errors.push(`Importing these ${newKeysCount} new keys would bring the total keys to ${currentCount + newKeysCount}, which exceeds the maximum limit of ${limit} keys.`);
             }
         }
 

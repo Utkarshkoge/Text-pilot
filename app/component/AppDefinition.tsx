@@ -538,34 +538,45 @@ export default function AppDefinition() {
                         {(() => {
                             const sourceDef = definitions.find(d => d.id === selectedSyncSource);
                             const previewSourceLangName = sourceDef?.language?.jsonValue || "Source Language";
-
+                            const isLimitExceeded = previewKeys.length > 200;
                             const checkboxLabel = (
                                 <Tooltip
                                     content={
-                                        <BlockStack gap="100">
-                                            <Text as="p" fontWeight="semibold">
-                                                Auto Translation
-                                            </Text>
-                                            <Text as="p">
-                                                • Uses free translation services.
-                                            </Text>
-                                            <Text as="p">
-                                                • Translations are not guaranteed to be available or accurate.
-                                            </Text>
-                                            <Text as="p">
-                                                • A translation is only added when a valid translated result is returned.
-                                            </Text>
-                                            <Text as="p">
-                                                • If translation fails or matches the source text, it will be skipped.
-                                            </Text>
-                                            <Text as="p">
-                                                • Always review translations before saving. You can also edit them later.
-                                            </Text>
-                                        </BlockStack>
+                                        isLimitExceeded ? (
+                                            <BlockStack gap="100">
+                                                <Text as="p" fontWeight="semibold">
+                                                    Auto Translation Unavailable
+                                                </Text>
+                                                <Text as="p">
+                                                    Auto translation is only available when syncing 200 or fewer keys. Currently syncing {previewKeys.length} keys.
+                                                </Text>
+                                            </BlockStack>
+                                        ) : (
+                                            <BlockStack gap="100">
+                                                <Text as="p" fontWeight="semibold">
+                                                    Auto Translation
+                                                </Text>
+                                                <Text as="p">
+                                                    • Uses free translation services.
+                                                </Text>
+                                                <Text as="p">
+                                                    • Translations are not guaranteed to be available or accurate.
+                                                </Text>
+                                                <Text as="p">
+                                                    • A translation is only added when a valid translated result is returned.
+                                                </Text>
+                                                <Text as="p">
+                                                    • If translation fails or matches the source text, it will be skipped.
+                                                </Text>
+                                                <Text as="p">
+                                                    • Always review translations before saving. You can also edit them later.
+                                                </Text>
+                                            </BlockStack>
+                                        )
                                     }
                                 >
                                     <InlineStack gap="100" blockAlign="center">
-                                        <Text as="span">Auto translation in {languageName}</Text>
+                                        <Text as="span" tone={isLimitExceeded ? "subdued" : undefined}>Auto translation in {languageName}</Text>
                                         <Icon source={InfoIcon} tone="subdued" />
                                     </InlineStack>
                                 </Tooltip>
@@ -588,21 +599,27 @@ export default function AppDefinition() {
                                     >
                                         <BlockStack gap="100">
                                             {previewKeys.length > 0 ? (
-                                                previewKeys.map(key => (
-                                                    <Text as="p" key={key}>• {key}</Text>
+                                                previewKeys.map((key, index) => (
+                                                    <Text as="p" key={index}>
+                                                        {index + 1}. {key}
+                                                    </Text>
                                                 ))
                                             ) : (
-                                                <Text as="p" tone="subdued">No keys found in this language.</Text>
+                                                <Text as="p" tone="subdued">
+                                                    No keys found in this language.
+                                                </Text>
                                             )}
                                         </BlockStack>
                                     </div>
                                     <Box paddingBlockStart="200">
                                         <Checkbox
                                             label={checkboxLabel}
-                                            checked={autoTranslateChecked}
+                                            checked={autoTranslateChecked && !isLimitExceeded}
                                             onChange={setAutoTranslateChecked}
+                                            disabled={isLimitExceeded}
                                         />
                                     </Box>
+
                                 </BlockStack>
                             );
                         })()}
@@ -640,7 +657,7 @@ export default function AppDefinition() {
                                     </Text>
 
                                     <Box
-                                        background="bg-surface-warning-subdued"
+                                        background="bg-surface-warning"
                                         borderColor="border-warning"
                                         borderWidth="025"
                                         borderRadius="200"
@@ -681,7 +698,7 @@ export default function AppDefinition() {
                     open={submittingIntent === "create" && (isTranslating || fetcher.state !== "idle") && !showCancelConfirmModal}
                     onClose={() => { }}
                     title={isTranslating ? "Auto Translating Keys" : "Adding Language Definition"}
-                    small
+                    size="small"
                     secondaryActions={isTranslating ? [
                         {
                             content: "Cancel",

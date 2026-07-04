@@ -60,6 +60,7 @@ export async function action({ request }: ActionFunctionArgs) {
             const syncSourceId = formData.get("syncSourceId") as string;
             const sourceMetaobject = await fetchMetaobjectById(admin, syncSourceId);
             const flatSource = flattenObject(sourceMetaobject.translation?.jsonValue ?? {});
+            delete flatSource["__keys_order__"];
             const keys = Object.keys(flatSource);
             return { success: true, keys };
         }
@@ -77,6 +78,7 @@ export async function action({ request }: ActionFunctionArgs) {
             if (syncSourceId) {
                 const sourceMetaobject = await fetchMetaobjectById(admin, syncSourceId);
                 const flatSource = flattenObject(sourceMetaobject.translation?.jsonValue ?? {});
+                delete flatSource["__keys_order__"];
                 createdKeys = Object.keys(flatSource);
 
                 if (translationsStr) {

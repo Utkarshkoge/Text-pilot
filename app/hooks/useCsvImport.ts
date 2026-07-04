@@ -70,7 +70,7 @@ export function useCsvImport({ currentTranslation, onImportConfirm, maxEntries }
                 }
             }
 
-            const limit = maxEntries !== undefined ? maxEntries : (mode === 'keys_only' ? 100 : 50);
+            const limit = maxEntries !== undefined ? maxEntries : (mode === 'keys_only' ? 200 : 100);
             if (totalEntries > limit) {
                 errors.push(`The CSV file contains ${totalEntries} entries, which exceeds the maximum limit of ${limit} entries allowed.`);
             }

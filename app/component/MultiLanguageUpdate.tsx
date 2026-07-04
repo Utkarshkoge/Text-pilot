@@ -68,7 +68,10 @@ export default function MultiLanguageUpdate() {
     const [languageProgress, setLanguageProgress] = useState<Record<string, LanguageProgress>>({});
     const [isApplyModalActive, setIsApplyModalActive] = useState(false);
     const [isClearModalActive, setIsClearModalActive] = useState(false);
+    const [limitExceededModalOpen, setLimitExceededModalOpen] = useState(false);
+    const [pendingLimitInfo, setPendingLimitInfo] = useState<{ currentCount: number; newLimit: number } | null>(null);
     const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+    const maxEntries = selectedIds.size > 0 ? Math.ceil(200 / selectedIds.size) : 200;
     const totalToProcess = useRef(0);
     const activeIdRef = useRef<string | null>(null);
     const [instructionsOpen, setInstructionsOpen] = useState(false);
@@ -100,10 +103,21 @@ export default function MultiLanguageUpdate() {
         const next = new Set(selectedIds);
         if (next.has(node.id)) {
             next.delete(node.id);
+            setSelectedIds(next);
         } else {
+            const nextSize = next.size + 1;
+            const newMaxEntries = Math.ceil(200 / nextSize);
+            const currentKeysCount = Object.keys(schema).length;
+
+            if (currentKeysCount > newMaxEntries) {
+                setPendingLimitInfo({ currentCount: currentKeysCount, newLimit: newMaxEntries });
+                setLimitExceededModalOpen(true);
+                return;
+            }
+
             next.add(node.id);
+            setSelectedIds(next);
         }
-        setSelectedIds(next);
     }
     function toggleAll() {
         if (selectedIds.size === nodes.length) {
@@ -111,9 +125,20 @@ export default function MultiLanguageUpdate() {
             setProcessingStatus('idle');
             setAutoTranslate(false);
         } else {
+            const nextSize = nodes.length;
+            const newMaxEntries = Math.ceil(200 / nextSize);
+            const currentKeysCount = Object.keys(schema).length;
+
+            if (currentKeysCount > newMaxEntries) {
+                setPendingLimitInfo({ currentCount: currentKeysCount, newLimit: newMaxEntries });
+                setLimitExceededModalOpen(true);
+                return;
+            }
+
             setSelectedIds(new Set(nodes.map(n => n.id)));
         }
     }
+
     function startOver() {
         setSchema({});
         setDirectKey('');
@@ -124,6 +149,10 @@ export default function MultiLanguageUpdate() {
     function addDirectKey() {
         const trimmed = directKey.trim();
         if (!trimmed) return;
+        if (Object.keys(schema).length >= maxEntries) {
+            setToastMessage(`Cannot add key. Maximum limit of ${maxEntries} keys reached.`);
+            return;
+        }
         if (schema[trimmed] !== undefined) {
             setToastMessage(`Key "${trimmed}" is already added.`);
             return;
@@ -210,13 +239,11 @@ export default function MultiLanguageUpdate() {
                 }
                 console.log(`[MultiLang] Submitting updates for ${nextId}:`, translatedSchema);
                 setLanguageProgress(prev => ({ ...prev, [nextId]: { ...prev[nextId], status: 'saving' } }));
-                // Submit to action to update the metaobject
                 fetcher.submit(
                     {
                         operation: 'apply_update',
                         metaobjectId: nextId,
                         updates: JSON.stringify(translatedSchema),
-                        orderedKeys: JSON.stringify(Object.keys(translatedSchema)),
                     },
                     { method: 'POST' }
                 );
@@ -263,6 +290,8 @@ export default function MultiLanguageUpdate() {
             setCurrentPage(totalPages);
         }
     }, [totalPages, currentPage]);
+    let currentImportKeysCount = schemaKeys.length;
+    let autoTranslationLimitExceeded = currentImportKeysCount > maxEntries;
     const { mdUp } = useBreakpoints();
     return (
         <Frame>
@@ -365,11 +394,7 @@ export default function MultiLanguageUpdate() {
                                             <BlockStack gap="100">
                                                 <Text as="h2" variant="headingMd">Add Keys</Text>
                                                 <Text as="p" tone="subdued">Define the keys to add across selected languages.</Text>
-                                                {/* <Banner tone="warning">
-                                                    <Text as="p">
-                                                        <strong>Auto Translate</strong> uses a free translation service. Please verify the generated translations before using them. The <strong>Key Name</strong> will be used as the source text.
-                                                    </Text>
-                                                </Banner> */}
+
                                                 {/* ADD KEY INPUT */}
                                                 <Box background="bg-surface-secondary" padding="300" borderRadius="200">
                                                     <InlineStack gap="300" align="start">
@@ -384,12 +409,13 @@ export default function MultiLanguageUpdate() {
                                                                 value={directKey}
                                                                 onChange={setDirectKey}
                                                                 autoComplete="off"
-                                                                placeholder="e.g. welcome_message"
+                                                                placeholder={schemaKeys.length >= maxEntries ? "Limit reached" : "e.g. welcome_message"}
+                                                                disabled={schemaKeys.length >= maxEntries}
                                                             />
                                                         </div>
                                                         <Box paddingBlockStart="600">
                                                             <InlineStack gap="200">
-                                                                <Button onClick={addDirectKey} disabled={!directKey.trim()}>Add</Button>
+                                                                <Button onClick={addDirectKey} disabled={!directKey.trim() || schemaKeys.length >= maxEntries}>Add</Button>
                                                                 <CsvImportModals
                                                                     currentTranslation={schema}
                                                                     onImportConfirm={(updates) => {
@@ -398,7 +424,8 @@ export default function MultiLanguageUpdate() {
                                                                         setTimeout(() => scrollContainerRef.current?.scrollTo({ top: 0, behavior: 'smooth' }), 50);
                                                                     }}
                                                                     buttonText="Add via CSV"
-                                                                    maxEntries={Math.ceil(200 / selectedIds.size)}
+                                                                    maxEntries={maxEntries}
+                                                                    disabled={schemaKeys.length >= maxEntries}
                                                                 />
                                                             </InlineStack>
                                                         </Box>
@@ -671,6 +698,35 @@ export default function MultiLanguageUpdate() {
                         </BlockStack>
                     </Modal.Section>
                 </Modal>
+                {limitExceededModalOpen && pendingLimitInfo && (
+                    <Modal
+                        open={limitExceededModalOpen}
+                        onClose={() => setLimitExceededModalOpen(false)}
+                        title="Key Limit Exceeded"
+                        primaryAction={{
+                            content: 'OK',
+                            onAction: () => setLimitExceededModalOpen(false),
+                        }}
+                    >
+                        <Modal.Section>
+                            <BlockStack gap="400">
+                                <Banner title="Limit Exceeded" tone="critical">
+                                    <BlockStack gap="200">
+                                        <Text as="p">
+                                            Selecting this language reduces the maximum allowed keys per language to <strong>{pendingLimitInfo.newLimit}</strong>.
+                                        </Text>
+                                        <Text as="p">
+                                            You currently have <strong>{pendingLimitInfo.currentCount}</strong> keys, which exceeds the new limit.
+                                        </Text>
+                                        <Text as="p">
+                                            Please remove some keys or save your changes before selecting additional languages.
+                                        </Text>
+                                    </BlockStack>
+                                </Banner>
+                            </BlockStack>
+                        </Modal.Section>
+                    </Modal>
+                )}
                 {toastMessage && (
                     <Toast content={toastMessage} duration={2000} onDismiss={() => setToastMessage(null)} error={toastMessage.toLowerCase().includes('already') || toastMessage.toLowerCase().includes('error')} />
                 )}

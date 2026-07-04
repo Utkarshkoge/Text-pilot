@@ -69,14 +69,13 @@ export async function action({ request }: ActionFunctionArgs) {
                 throw new Response('Missing metaobject id', { status: 400 });
             }
             const updatesRaw = formData.get('updatesToMerge') as string;
-            const orderedKeysRaw = formData.get('orderedKeys') as string;
 
             let updatesToMerge: Record<string, string | null> = updatesRaw ? JSON.parse(updatesRaw) : {};
-            let orderedKeys: string[] = orderedKeysRaw ? JSON.parse(orderedKeysRaw) : [];
 
             // Fetch current state from server to prevent overwriting parallel changes
             const metaobject = await fetchMetaobjectById(admin, metaobjectId);
             const currentTranslation = flattenObject(metaobject.translation?.jsonValue ?? {});
+            delete currentTranslation["__keys_order__"];
 
             // Apply updates and deletions
             for (const [key, value] of Object.entries(updatesToMerge)) {
@@ -87,25 +86,7 @@ export async function action({ request }: ActionFunctionArgs) {
                 }
             }
 
-            // Reconstruct object in the exact order requested by the client
-            let finalOrderedTranslation: Record<string, string> = {};
-            if (orderedKeys.length > 0) {
-                for (const key of orderedKeys) {
-                    if (currentTranslation[key] !== undefined) {
-                        finalOrderedTranslation[key] = currentTranslation[key];
-                    }
-                }
-                // Add any extra keys that might have been added in parallel by another user
-                for (const key of Object.keys(currentTranslation)) {
-                    if (finalOrderedTranslation[key] === undefined) {
-                        finalOrderedTranslation[key] = currentTranslation[key];
-                    }
-                }
-            } else {
-                finalOrderedTranslation = currentTranslation;
-            }
-
-            const updatedMetaoTranslation = await updateMetaobjectTranslation(admin, metaobjectId, finalOrderedTranslation);
+            const updatedMetaoTranslation = await updateMetaobjectTranslation(admin, metaobjectId, currentTranslation);
 
             return { updatedMetaoTranslation };
         }

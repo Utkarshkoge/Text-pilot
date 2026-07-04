@@ -60,7 +60,7 @@ export function CsvImportModals({ currentTranslation, onImportConfirm }: CsvImpo
                         <Card padding="400">
                             <BlockStack gap="200">
                                 <Text as="h3" variant="headingSm">Option 1: Add Keys Only</Text>
-                                <Text as="p" tone="subdued">Import only translation keys without translated values. (Maximum 100 entries)</Text>
+                                <Text as="p" tone="subdued">Import only translation keys without translated values. (Maximum 200 entries)</Text>
                                 <InlineStack gap="300" blockAlign="center">
                                     <Button onClick={() => triggerFileInput('keys_only')}>Select CSV File</Button>
                                     <Button variant="plain" onClick={() => handleDownloadTemplate('keys_only')}>Download Template</Button>
@@ -70,7 +70,7 @@ export function CsvImportModals({ currentTranslation, onImportConfirm }: CsvImpo
                         <Card padding="400">
                             <BlockStack gap="200">
                                 <Text as="h3" variant="headingSm">Option 2: Add Keys with Translation</Text>
-                                <Text as="p" tone="subdued">Import translation keys together with their translated values. (Maximum 50 entries)</Text>
+                                <Text as="p" tone="subdued">Import translation keys together with their translated values. (Maximum 100 entries)</Text>
                                 <InlineStack gap="300" blockAlign="center">
                                     <Button onClick={() => triggerFileInput('keys_with_translation')}>Select CSV File</Button>
                                     <Button variant="plain" onClick={() => handleDownloadTemplate('keys_with_translation')}>Download Template</Button>
@@ -157,15 +157,15 @@ export function CsvImportModals({ currentTranslation, onImportConfirm }: CsvImpo
                                                 </Text>
                                             </Banner>
                                         )}
-                                        <ButtonGroup segmented>
+                                        <ButtonGroup variant="segmented">
                                             <Button
                                                 pressed={csvPreviewFilter === 'valid'}
                                                 onClick={() => setCsvPreviewFilter('valid')}
-                                            >Valid Entries ({csvPreviewData.filter(d => d.status === 'New').length})</Button>
+                                            >{`Valid Entries (${csvPreviewData.filter(d => d.status === 'New').length})`}</Button>
                                             <Button
                                                 pressed={csvPreviewFilter === 'duplicate'}
                                                 onClick={() => setCsvPreviewFilter('duplicate')}
-                                            >Duplicate Entries ({csvPreviewData.filter(d => d.status === 'Duplicate').length})</Button>
+                                            >{`Duplicate Entries (${csvPreviewData.filter(d => d.status === 'Duplicate').length})`}</Button>
                                         </ButtonGroup>
                                         <div style={{ position: 'relative' }}>
                                             {/* Header Row */}

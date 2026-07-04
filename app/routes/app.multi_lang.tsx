@@ -43,31 +43,15 @@ export async function action({ request }: ActionFunctionArgs) {
         metaobjectId = formData.get('metaobjectId') as string;
         if (operation === 'apply_update') {
             const updatesRaw = formData.get('updates') as string;
-            const orderedKeysRaw = formData.get('orderedKeys') as string;
             if (!metaobjectId) return { error: 'Missing metaobject ID', metaobjectId };
             // updates is already flat and translated by the client!
             const updates: Record<string, string> = updatesRaw ? JSON.parse(updatesRaw) : {};
-            const orderedKeys: string[] = orderedKeysRaw ? JSON.parse(orderedKeysRaw) : [];
-            let contentToMerge: Record<string, string> = structuredClone(updates);
             const metaobject = await fetchMetaobjectById(admin, metaobjectId);
             const currentTranslation = flattenObject(metaobject.translation?.jsonValue ?? {});
-            let finalTranslation: Record<string, string> = {};
-            if (orderedKeys.length > 0) {
-                // Add only completely new keys at the top
-                for (const key of orderedKeys) {
-                    if (currentTranslation[key] === undefined) {
-                        finalTranslation[key] = contentToMerge[key] !== undefined ? contentToMerge[key] : '';
-                    }
-                }
-                // Keep all existing keys in their original positions and values
-                for (const key of Object.keys(currentTranslation)) {
-                    if (finalTranslation[key] === undefined) {
-                        finalTranslation[key] = currentTranslation[key];
-                    }
-                }
-            } else {
-                finalTranslation = { ...currentTranslation, ...contentToMerge };
-            }
+            delete currentTranslation["__keys_order__"];
+
+            const finalTranslation = { ...currentTranslation, ...updates };
+
             const finalResult = await updateMetaobjectTranslation(admin, metaobjectId, finalTranslation);
             return { success: true, metaobjectId, finalTranslation: finalResult.translation?.jsonValue };
         }
