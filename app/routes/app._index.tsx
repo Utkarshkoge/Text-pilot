@@ -13,7 +13,6 @@ import {
   Frame,
   Divider,
   Badge,
-  Banner,
 } from "@shopify/polaris";
 import {
   LanguageIcon,
@@ -26,6 +25,7 @@ import {
   StarIcon,
 } from "@shopify/polaris-icons";
 import { authenticate } from "../shopify.server";
+import { RouteErrorBoundary } from "app/component/RouteErrorBoundary";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   await authenticate.admin(request);
@@ -224,4 +224,9 @@ export default function Index() {
       </Page>
     </Frame>
   );
+}
+
+
+export function ErrorBoundary() {
+  return <RouteErrorBoundary routeName="Home page" />;
 }

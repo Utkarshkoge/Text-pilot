@@ -10,6 +10,7 @@ import { TranslationDefinitionMissing } from "../component/TranslationDefinition
 import { CsvImportModals } from '../component/CsvSync/CsvImportModalsMulti';
 import { Toast, Frame } from '@shopify/polaris';
 import { MultiLanguageInstructionsModal } from 'app/component/InstructionsModal';
+import { RouteErrorBoundary } from 'app/component/RouteErrorBoundary';
 const KeyPreviewRow = ({ keyName, index, onRemove }: { keyName: string, index: number, onRemove: () => void }) => {
     const [isHovered, setIsHovered] = useState(false);
     return (
@@ -754,4 +755,9 @@ function MultiLanguageUpdate() {
             </Page>
         </Frame>
     );
+}
+
+
+export function ErrorBoundary() {
+    return <RouteErrorBoundary routeName="Translation Multi Language" />;
 }

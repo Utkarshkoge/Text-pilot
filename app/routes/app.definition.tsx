@@ -5,13 +5,11 @@ import {
     Layout,
     Card,
     Button,
-    IndexTable,
     Modal,
     Text,
     FormLayout,
     Toast,
     InlineStack,
-    EmptyState,
     Frame,
     Autocomplete,
     Icon,
@@ -40,6 +38,7 @@ import { flattenObject } from "../utils/csvSyncUtils";
 import { TranslationDefinitionMissing } from "../component/TranslationDefinitionMissing";
 import { batchTranslateText } from "../utils/googleTranslate";
 import { AddDefinitionInstructionsModal } from "app/component/InstructionsModal";
+import { RouteErrorBoundary } from "app/component/RouteErrorBoundary";
 
 type Definition = {
     id: string;
@@ -1045,4 +1044,9 @@ export default function AppDefinition() {
             </Page>
         </Frame>
     );
+}
+
+
+export function ErrorBoundary() {
+    return <RouteErrorBoundary routeName="Translation Definition" />;
 }

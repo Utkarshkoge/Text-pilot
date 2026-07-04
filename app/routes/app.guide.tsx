@@ -3,6 +3,7 @@ import { useNavigate, type LoaderFunctionArgs } from "react-router";
 import { Page, Layout, Card, BlockStack, Text, Box, Button, InlineStack, ProgressBar, Badge } from "@shopify/polaris";
 import { ClipboardIcon, CheckIcon } from "@shopify/polaris-icons";
 import { authenticate } from "../shopify.server";
+import { RouteErrorBoundary } from "app/component/RouteErrorBoundary";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
     await authenticate.admin(request);
@@ -372,4 +373,9 @@ export default function TranslationTestComponent() {
             </Layout>
         </Page>
     );
+}
+
+
+export function ErrorBoundary() {
+    return <RouteErrorBoundary routeName="Developer Guide" />;
 }

@@ -40,6 +40,7 @@ import { CsvImportModals } from '../component/CsvSync/CsvImportModals';
 import { DataSyncModals } from '../component/CsvSync/DataSyncModals';
 import type { LanguageNode } from '../hooks/useDataSync';
 import { SingleLanguageInstructionsModal } from 'app/component/InstructionsModal';
+import { RouteErrorBoundary } from 'app/component/RouteErrorBoundary';
 
 export async function loader({ request }: LoaderFunctionArgs) {
     const { admin } = await authenticate.admin(request);
@@ -891,4 +892,9 @@ function LanguageSelector() {
             </Page>
         </Frame >
     );
+}
+
+
+export function ErrorBoundary() {
+    return <RouteErrorBoundary routeName="Single Language Page" />;
 }
