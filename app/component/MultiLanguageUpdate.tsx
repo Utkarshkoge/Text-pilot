@@ -1,5 +1,5 @@
 
-import { useLoaderData, useFetcher, useNavigate } from 'react-router';
+import { useLoaderData, useFetcher, useNavigate, useOutletContext } from 'react-router';
 import { useEffect, useState, useRef, useMemo } from 'react';
 import { BlockStack, Card, Page, Text, Box, InlineStack, Button, Checkbox, TextField, ProgressBar, Banner, Divider, Modal, InlineGrid, useBreakpoints, DataTable, EmptyState, Tooltip, Icon } from '@shopify/polaris';
 import { DeleteIcon } from '@shopify/polaris-icons';
@@ -49,6 +49,10 @@ export default function MultiLanguageUpdate() {
     const fetcher = useFetcher<any>();
     const navigate = useNavigate();
     const nodes = rawNodes as LanguageNode[];
+    const { subscription } = useOutletContext<{ subscription: any }>();
+    const displayedNodes = (!subscription?.present && nodes.length > 0)
+        ? [nodes[0]]
+        : nodes;
     // schema is always flat: { key: '' }
     const [schema, setSchema] = useState<Record<string, string>>({});
     const [directKey, setDirectKey] = useState('');
@@ -120,12 +124,12 @@ export default function MultiLanguageUpdate() {
         }
     }
     function toggleAll() {
-        if (selectedIds.size === nodes.length) {
+        if (selectedIds.size === displayedNodes.length) {
             setSelectedIds(new Set());
             setProcessingStatus('idle');
             setAutoTranslate(false);
         } else {
-            const nextSize = nodes.length;
+            const nextSize = displayedNodes.length;
             const newMaxEntries = Math.ceil(200 / nextSize);
             const currentKeysCount = Object.keys(schema).length;
 
@@ -135,7 +139,7 @@ export default function MultiLanguageUpdate() {
                 return;
             }
 
-            setSelectedIds(new Set(nodes.map(n => n.id)));
+            setSelectedIds(new Set(displayedNodes.map(n => n.id)));
         }
     }
 
@@ -331,13 +335,13 @@ export default function MultiLanguageUpdate() {
                                     {processingStatus === 'idle' && (
                                         <Box paddingBlockEnd="200" borderColor="border" borderBlockEndWidth="025">
                                             <Button onClick={toggleAll} size="micro">
-                                                {selectedIds.size === nodes.length ? "Deselect All" : "Select All"}
+                                                {selectedIds.size === displayedNodes.length ? "Deselect All" : "Select All"}
                                             </Button>
                                         </Box>
                                     )}
                                     <div style={{ maxHeight: '500px', overflowY: 'auto' }}>
                                         <BlockStack gap="050">
-                                            {nodes.map(node => {
+                                            {displayedNodes.map(node => {
                                                 const isSelected = selectedIds.has(node.id);
                                                 return (
                                                     <div
@@ -370,6 +374,7 @@ export default function MultiLanguageUpdate() {
                                 </BlockStack>
                             </Card>
                         )}
+
                         {/* RIGHT COLUMN */}
                         <BlockStack gap="100">
                             {selectedIds.size === 0 ? (

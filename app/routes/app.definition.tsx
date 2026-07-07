@@ -1,6 +1,7 @@
-import { type LoaderFunctionArgs, type ActionFunctionArgs, useLoaderData } from "react-router";
+import { type LoaderFunctionArgs, type ActionFunctionArgs, useLoaderData, useOutletContext } from "react-router";
 import { authenticate } from "../shopify.server";
 import { AUTHORS_QUERY } from "../query/translationQuery";
+import prisma from "../db.server";
 import {
     createMetaobject,
     deleteMetaobject,
@@ -25,19 +26,24 @@ type Definition = {
 
 export async function loader({ request }: LoaderFunctionArgs) {
     try {
-        const { admin } = await authenticate.admin(request);
+        const { admin, session } = await authenticate.admin(request);
 
         const hasDef = await hasMetaobjectDefinition(admin);
         if (!hasDef) {
-            return { definitions: [], hasDefinition: false };
+            return { definitions: [], hasDefinition: false, isSubscribed: false };
         }
 
         const response = await admin.graphql(AUTHORS_QUERY);
         const json = await response.json();
 
+        const activeSub = await prisma.activeSubscription.findUnique({
+            where: { shopDomain: session.shop }
+        });
+
         return {
             definitions: (json.data?.metaobjects?.nodes || []) as Definition[],
             hasDefinition: true,
+            isSubscribed: !!activeSub,
         };
     } catch (error) {
         console.error("Error in app.definition loader:", error);
@@ -46,7 +52,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 }
 
 export async function action({ request }: ActionFunctionArgs) {
-    const { admin } = await authenticate.admin(request);
+    const { admin, session } = await authenticate.admin(request);
     const formData = await request.formData();
     const intent = formData.get("intent");
 
@@ -60,13 +66,30 @@ export async function action({ request }: ActionFunctionArgs) {
             const syncSourceId = formData.get("syncSourceId") as string;
             const sourceMetaobject = await fetchMetaobjectById(admin, syncSourceId);
             const flatSource = flattenObject(sourceMetaobject.translation?.jsonValue ?? {});
-            delete flatSource["__keys_order__"];
             const keys = Object.keys(flatSource);
             return { success: true, keys };
         }
 
         if (intent === "create") {
+            // Check subscription limit on languages
+            const activeSub = await prisma.activeSubscription.findUnique({
+                where: { shopDomain: session.shop }
+            });
+            const isSubscribed = !!activeSub;
+
+            const response = await admin.graphql(AUTHORS_QUERY);
+            const json = await response.json();
+            const currentCount = json.data?.metaobjects?.nodes?.length || 0;
+
+            if (!isSubscribed && currentCount >= 1) {
+                return {
+                    success: false,
+                    error: "You can only support 1 language on the Free plan. Please upgrade to the Advanced Plan to add more languages."
+                };
+            }
+
             const locale = formData.get("locale") as string;
+
             const language = formData.get("language") as string;
             const syncSourceId = formData.get("syncSourceId") as string | null;
             const autoTranslate = formData.get("autoTranslate") === "true";
@@ -78,7 +101,6 @@ export async function action({ request }: ActionFunctionArgs) {
             if (syncSourceId) {
                 const sourceMetaobject = await fetchMetaobjectById(admin, syncSourceId);
                 const flatSource = flattenObject(sourceMetaobject.translation?.jsonValue ?? {});
-                delete flatSource["__keys_order__"];
                 createdKeys = Object.keys(flatSource);
 
                 if (translationsStr) {
@@ -161,6 +183,9 @@ export async function action({ request }: ActionFunctionArgs) {
 
 export default function AppDefinitionPage() {
     const { hasDefinition } = useLoaderData<typeof loader>();
+    const { subscription } = useOutletContext<{ subscription: any }>();
+    console.log("Subscription status in AppDefinitionPage:", subscription);
+
     if (!hasDefinition) {
         return <TranslationDefinitionMissing pagename="Manage Definitions" />;
     }

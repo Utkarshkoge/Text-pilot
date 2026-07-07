@@ -8,16 +8,56 @@ import "@shopify/polaris/build/esm/styles.css";
 import translations from "@shopify/polaris/locales/en.json";
 
 import { authenticate } from "../shopify.server";
+import prisma from "../db.server";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-  await authenticate.admin(request);
+  try {
+    const { session } = await authenticate.admin(request);
+    const shopDomain = session.shop;
 
-  // eslint-disable-next-line no-undef
-  return { apiKey: process.env.SHOPIFY_API_KEY || "" };
+    const activeSub = await prisma.activeSubscription.findUnique({
+      where: { shopDomain }
+    });
+
+    let present = !!activeSub;
+    let remainingDays: number | undefined = undefined;
+
+    if (activeSub && activeSub.updatedAt) {
+      const subscriptionDate = new Date(activeSub.updatedAt);
+      const today = new Date();
+      const diffTime = today.getTime() - subscriptionDate.getTime();
+      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+      const calculatedDays = Math.max(-1, 30 - diffDays);
+
+      if (calculatedDays === -1) {
+        await prisma.activeSubscription.deleteMany({
+          where: { shopDomain }
+        });
+        present = false;
+        remainingDays = 0;
+      } else {
+        present = true;
+        remainingDays = calculatedDays;
+      }
+    }
+
+    // eslint-disable-next-line no-undef
+    return {
+      apiKey: process.env.SHOPIFY_API_KEY || "",
+      subscription: {
+        present,
+        remainingDays
+      }
+    };
+  } catch (error) {
+    console.error("Error in app.tsx loader:", error);
+    throw error;
+  }
 };
 
+
 export default function App() {
-  const { apiKey } = useLoaderData<typeof loader>();
+  const { apiKey, subscription } = useLoaderData<typeof loader>();
 
   return (
     <AppProvider embedded apiKey={apiKey}>
@@ -27,9 +67,10 @@ export default function App() {
           <s-link href="/app/multi_lang">Multiple Languages</s-link>
           <s-link href="/app/definition">Manage Definitions</s-link>
           <s-link href="/app/guide">Developer Guide</s-link>
+          <s-link href="/app/billing/subscribe">Billing</s-link>
 
         </s-app-nav>
-        <Outlet />
+        <Outlet context={{ subscription }} />
       </PolarisAppProvider>
     </AppProvider>
   );

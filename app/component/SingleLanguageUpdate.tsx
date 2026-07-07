@@ -1,4 +1,4 @@
-import { useLoaderData, useFetcher, useNavigate } from 'react-router';
+import { useLoaderData, useFetcher, useNavigate, useOutletContext } from 'react-router';
 
 import { useEffect, useState, useRef, useCallback, useMemo } from 'react';
 import {
@@ -40,7 +40,6 @@ import { flattenObject } from 'app/utils/csvSyncUtils';
 
 function processIncomingTranslation(flat: Record<string, string>): Record<string, string> {
     const cleaned = { ...flat };
-    delete cleaned["__keys_order__"];
     return cleaned;
 }
 
@@ -53,6 +52,10 @@ export function SingleLanguageUpdate() {
     const navigate = useNavigate();
 
     const nodes = rawNodes as LanguageNode[];
+    const { subscription } = useOutletContext<{ subscription: any }>();
+    const displayedNodes = (!subscription?.present && nodes.length > 0)
+        ? [nodes[0]]
+        : nodes;
     const data = { nodes };
 
     // translation is always a flat Record<string, string>
@@ -290,10 +293,9 @@ export function SingleLanguageUpdate() {
         if ('updatedMetaoTranslation' in fetcher.data) {
             const updated = (fetcher.data as any).updatedMetaoTranslation?.translation?.jsonValue ?? {};
             const flat = flattenObject(updated);
-            const cleaned = processIncomingTranslation(flat);
 
-            setTranslation(cleaned);
-            setOriginalTranslation(cleaned);
+            setTranslation(flat);
+            setOriginalTranslation(flat);
             setIsDirty(false);
             setAutoTranslate(false);
             inputBufferRef.current = {};
@@ -310,9 +312,8 @@ export function SingleLanguageUpdate() {
         if ('syncSourceTranslation' in fetcher.data) {
             const sourceJson = (fetcher.data as any).syncSourceTranslation || {};
             const sourceFlat = flattenObject(sourceJson);
-            const cleaned = processIncomingTranslation(sourceFlat);
             if (syncResolverRef.current) {
-                syncResolverRef.current(cleaned);
+                syncResolverRef.current(sourceFlat);
                 syncResolverRef.current = null;
             }
             return;
@@ -321,9 +322,8 @@ export function SingleLanguageUpdate() {
         if ('Translation' in fetcher.data) {
             const translationJson = (fetcher.data as any).Translation || {};
             const flat = flattenObject(translationJson);
-            const cleaned = processIncomingTranslation(flat);
-            setTranslation(cleaned);
-            setOriginalTranslation(cleaned);
+            setTranslation(flat);
+            setOriginalTranslation(flat);
             inputBufferRef.current = {};
         }
     }, [fetcher.data]);
@@ -382,7 +382,7 @@ export function SingleLanguageUpdate() {
                 </Modal>
 
 
-                {data.nodes.length === 0 ? (
+                {displayedNodes.length === 0 ? (
                     <Card>
                         <Box padding="800">
                             <BlockStack gap="400" align="center" inlineAlign="center">
@@ -404,7 +404,7 @@ export function SingleLanguageUpdate() {
                                 <Text as="h2" variant="headingMd">Languages</Text>
                                 <div style={{ maxHeight: '500px', overflowY: 'auto' }}>
                                     <BlockStack gap="050">
-                                        {data.nodes.map((node) => {
+                                        {displayedNodes.map((node) => {
                                             const isSelected = node.id === selectedId;
 
                                             return (

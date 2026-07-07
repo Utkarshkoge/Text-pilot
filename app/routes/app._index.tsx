@@ -1,5 +1,6 @@
 
-import { type LoaderFunctionArgs, useNavigate } from "react-router";
+import { useState, useEffect } from "react";
+import { type LoaderFunctionArgs, useNavigate, useOutletContext, useFetcher } from "react-router";
 import {
   Page,
   Layout,
@@ -13,6 +14,7 @@ import {
   Frame,
   Divider,
   Badge,
+  Modal,
 } from "@shopify/polaris";
 import {
   LanguageIcon,
@@ -23,6 +25,7 @@ import {
   AutomationIcon,
   CodeIcon,
   StarIcon,
+  ClockIcon,
 } from "@shopify/polaris-icons";
 import { authenticate } from "../shopify.server";
 import { RouteErrorBoundary } from "app/component/RouteErrorBoundary";
@@ -101,10 +104,46 @@ const actions = [
   },
 ];
 
+const CONFETTI_COLORS = ["#FFC107", "#FF5722", "#E91E63", "#9C27B0", "#3F51B5", "#00BCD4", "#4CAF50", "#FFEB3B"];
+
+const confettiParticles = Array.from({ length: 60 }).map((_, i) => {
+  const color = CONFETTI_COLORS[i % CONFETTI_COLORS.length];
+  const left = Math.random() * 100;
+  const delay = Math.random() * 2.5;
+  const duration = Math.random() * 2 + 1.5;
+  const size = Math.random() * 8 + 6;
+  const isCircle = Math.random() > 0.5;
+  return { color, left, delay, duration, size, isCircle };
+});
+
 // ─── Component ────────────────────────────────────────────────────────────────
 export default function Index() {
   const navigate = useNavigate();
+  const { subscription } = useOutletContext<{ subscription: any }>();
+  console.log("Subscription status in Index:", subscription);
 
+  const checkFetcher = useFetcher<{ showPopup: boolean }>();
+  const closeFetcher = useFetcher();
+  const [modalOpen, setModalOpen] = useState(false);
+
+  useEffect(() => {
+    checkFetcher.load("/api/checkPopup/subscription");
+  }, []);
+
+  useEffect(() => {
+    if (checkFetcher.data?.showPopup) {
+      setModalOpen(true);
+    }
+  }, [checkFetcher.data]);
+
+  const handleCloseModal = () => {
+    setModalOpen(false);
+    closeFetcher.load("/api/closePopup/subscription");
+  };
+
+  const subscriptionName = subscription?.present ? "Advanced Plan" : "Free Plan";
+
+  const remainingDays = subscription?.remainingDays;
   return (
     <Frame>
       <Page
@@ -112,10 +151,97 @@ export default function Index() {
         subtitle="Manage your store's multilingual content - stored natively in Shopify Metaobjects."
       >
         <Layout>
+          {/* ── Subscription Plan Status Card ── */}
+          <Layout.Section>
+            <Card>
+              <InlineStack align="space-between" blockAlign="center">
+                <InlineStack gap="800" blockAlign="center">
+                  {/* Current Plan */}
+                  <BlockStack gap="200">
+                    <Text
+                      variant="bodyXs"
+                      tone="subdued"
+                      fontWeight="bold"
+                      as="span"
+                    >
+                      CURRENT PLAN
+                    </Text>
+                    <Badge tone={subscription?.present ? "success" : "info"}>
+                      {subscriptionName}
+                    </Badge>
+                  </BlockStack>
+
+                  {/* Status Message */}
+                  <BlockStack>
+                    {subscription?.present ? (
+                      <Text variant="bodyLg" tone="success" fontWeight="bold" as="strong">
+                        Easily manage all your languages simply
+                      </Text>
+                    ) : (
+                      <Text variant="bodyMd" tone="success" fontWeight="bold" as="strong">
+                        Please upgrade your plan so that you can add more than one language
+                      </Text>
+                    )}
+                  </BlockStack>
+                </InlineStack>
+
+                <InlineStack gap="400" blockAlign="center">
+                  {subscription?.present && remainingDays !== undefined && (
+                    <Box
+                      paddingInlineEnd="400"
+                      borderInlineEndWidth="0"
+                      borderColor="border"
+                    >
+                      <InlineStack gap="300" blockAlign="center">
+                        <Box
+                          padding="200"
+                          background={
+                            remainingDays <= 5
+                              ? "bg-surface-critical"
+                              : "bg-surface-secondary"
+                          }
+                          borderRadius="200"
+                        >
+                          <ClockIcon width={20} height={20} />
+                        </Box>
+                        <BlockStack gap="100">
+                          <Text
+                            variant="headingLg"
+                            as="p"
+                            fontWeight="bold"
+                            tone={remainingDays <= 5 ? "critical" : undefined}
+                          >
+                            {remainingDays} {remainingDays === 1 ? "Day" : "Days"}
+                          </Text>
+                          <Text
+                            variant="bodyXs"
+                            tone="subdued"
+                            fontWeight="medium"
+                            as="span"
+                          >
+                            REMAINING
+                          </Text>
+                        </BlockStack>
+                      </InlineStack>
+                    </Box>
+                  )}
+
+                  {!subscription?.present && (
+                    <Button
+                      variant="primary"
+                      onClick={() => navigate("/app/billing/subscribe")}
+                    >
+                      Upgrade to Advance Plan
+                    </Button>
+                  )}
+                </InlineStack>
+              </InlineStack>
+            </Card>
+          </Layout.Section>
 
           {/* ── Main action cards ── */}
           <Layout.Section>
-            <BlockStack gap="300">
+            <BlockStack gap="200">
               <InlineGrid columns={{ xs: 1, sm: 3 }} gap="400">
                 {actions.map((action) => {
                   const Icon = action.icon;
@@ -156,7 +282,7 @@ export default function Index() {
           {/* ── What this app provides ── */}
           <Layout.Section>
             <Card>
-              <BlockStack gap="500">
+              <BlockStack gap="200">
                 {/* Header */}
                 <BlockStack gap="100">
                   <Text as="h2" variant="headingMd">
@@ -171,7 +297,7 @@ export default function Index() {
                 <Divider />
 
                 {/* 2-column feature grid */}
-                <InlineGrid columns={{ xs: 1, sm: 2, md: 3 }} gap="500">
+                <InlineGrid columns={{ xs: 1, sm: 2, md: 3 }} gap="300">
                   {highlights.map((h) => {
                     const Icon = h.icon;
                     return (
@@ -206,7 +332,7 @@ export default function Index() {
 
                 {/* How it connects to Hydrogen */}
                 <InlineStack align="space-between" blockAlign="center" wrap>
-                  <BlockStack gap="100">
+                  <BlockStack>
                     <Text as="h3" variant="headingSm" fontWeight="bold">
                       Using this with Hydrogen?
                     </Text>
@@ -228,6 +354,105 @@ export default function Index() {
 
         </Layout>
       </Page>
+
+      {/* Celebration Modal */}
+      <Modal
+        open={modalOpen}
+        onClose={handleCloseModal}
+        title=""
+        primaryAction={{
+          content: "Get Started 🎉",
+          onAction: handleCloseModal,
+        }}
+      >
+        <Modal.Section>
+          <style>{`
+            @keyframes confetti-fall {
+              0% { transform: translateY(-30px) rotate(0deg); opacity: 1; }
+              100% { transform: translateY(450px) rotate(360deg); opacity: 0; }
+            }
+            .confetti-wrapper {
+              position: absolute;
+              top: 0;
+              left: 0;
+              width: 100%;
+              height: 100%;
+              pointer-events: none;
+              overflow: hidden;
+              z-index: 10;
+            }
+            .confetti-p {
+              position: absolute;
+              top: -20px;
+              border-radius: 50%;
+              animation: confetti-fall linear infinite;
+            }
+            @keyframes scale-up-bounce {
+              0% { transform: scale(0.3); opacity: 0; }
+              50% { transform: scale(1.1); }
+              70% { transform: scale(0.9); }
+              100% { transform: scale(1); opacity: 1; }
+            }
+            .celebration-icon {
+              font-size: 60px;
+              text-align: center;
+              animation: scale-up-bounce 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
+              margin-bottom: 16px;
+            }
+            .celebration-title {
+              text-align: center;
+              background: linear-gradient(135deg, #10B981 0%, #3B82F6 100%);
+              -webkit-background-clip: text;
+              -webkit-text-fill-color: transparent;
+              margin-bottom: 12px;
+            }
+            .celebration-text {
+              text-align: center;
+              color: var(--p-color-text-secondary);
+              font-size: 16px;
+              line-height: 1.5;
+            }
+          `}</style>
+          <div style={{ position: "relative", minHeight: "260px", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "16px" }}>
+            {/* Confetti */}
+            <div className="confetti-wrapper">
+              {confettiParticles.map((c, idx) => (
+                <div
+                  key={idx}
+                  className="confetti-p"
+                  style={{
+                    left: `${c.left}%`,
+                    backgroundColor: c.color,
+                    animationDelay: `${c.delay}s`,
+                    animationDuration: `${c.duration}s`,
+                    width: `${c.size}px`,
+                    height: `${c.size}px`,
+                    borderRadius: c.isCircle ? "50%" : "0%",
+                  }}
+                />
+              ))}
+            </div>
+
+            {/* Content */}
+            <div className="celebration-icon">🎉</div>
+            <div className="celebration-title">
+              <Text as="h2" variant="headingLg" fontWeight="bold">
+                Subscription Activated!
+              </Text>
+            </div>
+            <div className="celebration-text">
+              <BlockStack gap="300">
+                <Text as="p" variant="bodyLg">
+                  Congratulations! Your store is now upgraded to the <strong>Advance Plan</strong>.
+                </Text>
+                <Text as="p" variant="bodyMd" tone="subdued">
+                  You now have access to unlimited supported languages, automatic bulk translations, and native synchronization across all keys.
+                </Text>
+              </BlockStack>
+            </div>
+          </div>
+        </Modal.Section>
+      </Modal>
     </Frame>
   );
 }

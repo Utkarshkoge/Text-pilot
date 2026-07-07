@@ -11,6 +11,11 @@ automatically_update_urls_on_dev = true
 [webhooks]
 api_version = "2026-04"
 
+
+[[webhooks.subscriptions]]
+topics = [ "app_subscriptions/update" ]
+uri = "/webhooks/app/subscriptions/update"
+
 [[webhooks.subscriptions]]
 topics = [ "app/uninstalled" ]
 uri = "/webhooks/app/uninstalled"
@@ -33,7 +38,7 @@ uri = "/webhooks/shop/redact"
 
 [access_scopes]
 # Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
-scopes = "write_products,read_metaobject_definitions,write_metaobject_definitions,read_metaobjects,write_metaobjects"
+scopes = "read_own_subscription_contracts,write_own_subscription_contracts,write_products,read_metaobject_definitions,write_metaobject_definitions,read_metaobjects,write_metaobjects"
 
 [auth]
 redirect_urls = [ "https://example.com/api/auth" ]

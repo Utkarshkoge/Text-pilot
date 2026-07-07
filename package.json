@@ -39,6 +39,7 @@
     "@vitalets/google-translate-api": "^9.2.1",
     "anylang": "^3.3.0",
     "deepl-node": "^1.24.0",
+    "dotenv": "^17.4.2",
     "google-translate-api": "^2.3.0",
     "google-translate-api-x": "^10.7.2",
     "isbot": "^5.1.31",

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from "react";
-import { useLoaderData, useFetcher, useNavigate } from "react-router";
+import { useLoaderData, useFetcher, useNavigate, useOutletContext } from "react-router";
 import {
     Page,
     Layout,
@@ -34,7 +34,15 @@ export default function AppDefinition() {
     const { definitions } = useLoaderData<typeof loader>();
     const fetcher = useFetcher<any>();
     const navigate = useNavigate();
+    const { subscription } = useOutletContext<{ subscription: any }>();
+    console.log("Subscription status in AppDefinition:", subscription);
+
+    const displayedDefinitions = (!subscription?.present && definitions?.length > 0)
+        ? [definitions[0]]
+        : (definitions || []);
+
     const [modalOpen, setModalOpen] = useState(false);
+    const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
     const [languageName, setLanguageName] = useState("");
     const [localeCode, setLocaleCode] = useState("");
     const [inputValue, setInputValue] = useState("");
@@ -168,6 +176,11 @@ export default function AppDefinition() {
     }, [keysFetcher.state, keysFetcher.data]);
 
     const handleCreate = () => {
+        const isSubscribed = subscription?.present || false;
+        if (!isSubscribed && definitions.length >= 1) {
+            setUpgradeModalOpen(true);
+            return;
+        }
         setLanguageName("");
         setLocaleCode("");
         setInputValue("");
@@ -328,7 +341,8 @@ export default function AppDefinition() {
                 primaryAction={{
                     content: "Add Language",
                     icon: PlusIcon,
-                    onAction: handleCreate
+                    onAction: handleCreate,
+                    disabled: !subscription?.present && definitions?.length >= 1
                 }}
                 secondaryActions={[
                     {
@@ -343,9 +357,25 @@ export default function AppDefinition() {
                     }
                 `}</style>
                 <Layout>
+                    {!subscription?.present && definitions.length >= 1 && (
+                        <Layout.Section>
+                            <Banner
+                                title="You have reached the Free Plan limit"
+                                tone="warning"
+                                action={{
+                                    content: "Upgrade to Advance Plan",
+                                    onAction: () => navigate("/app/billing/subscribe")
+                                }}
+                            >
+                                <p>
+                                    You can only add 1 language on the Free Plan. Upgrade to the Advance Plan ($5/month) to add unlimited languages.
+                                </p>
+                            </Banner>
+                        </Layout.Section>
+                    )}
                     <Layout.Section>
                         <Card padding="0">
-                            {definitions.length > 0 ? (
+                            {displayedDefinitions.length > 0 ? (
                                 <div style={{ display: 'flex', flexDirection: 'column' }}>
                                     {/* Sticky Table Header */}
                                     <div style={{
@@ -367,11 +397,11 @@ export default function AppDefinition() {
                                     {/* Scrollable Rows */}
                                     <div
                                         style={{
-                                            maxHeight: definitions.length > 10 ? "500px" : "auto",
-                                            overflowY: definitions.length > 10 ? "auto" : "initial"
+                                            maxHeight: displayedDefinitions.length > 10 ? "500px" : "auto",
+                                            overflowY: displayedDefinitions.length > 10 ? "auto" : "initial"
                                         }}
                                     >
-                                        {definitions.map(({ id, language, locale }) => (
+                                        {displayedDefinitions.map(({ id, language, locale }) => (
                                             <div
                                                 key={id}
                                                 className="definition-row"
@@ -823,6 +853,36 @@ export default function AppDefinition() {
                     open={instructionsOpen}
                     onClose={() => setInstructionsOpen(false)}
                 />
+
+                <Modal
+                    open={upgradeModalOpen}
+                    onClose={() => setUpgradeModalOpen(false)}
+                    title="Upgrade to Advance Plan Required"
+                    primaryAction={{
+                        content: "Upgrade to Advance Plan",
+                        onAction: () => {
+                            setUpgradeModalOpen(false);
+                            navigate("/app/billing/subscribe");
+                        }
+                    }}
+                    secondaryActions={[
+                        {
+                            content: "Cancel",
+                            onAction: () => setUpgradeModalOpen(false)
+                        }
+                    ]}
+                >
+                    <Modal.Section>
+                        <BlockStack gap="300">
+                            <Text as="p">
+                                To support multiple languages, you need to be on our <strong>Advance Plan</strong>.
+                            </Text>
+                            <Text as="p" tone="subdued">
+                                Currently, you are on the Free Plan which allows only <strong>1 language definition</strong>. Upgrade today to add unlimited languages, translate them instantly, and reach customers worldwide.
+                            </Text>
+                        </BlockStack>
+                    </Modal.Section>
+                </Modal>
             </Page>
         </Frame>
     );

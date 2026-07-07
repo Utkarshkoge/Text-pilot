@@ -1,5 +1,5 @@
 import { useState, useCallback } from "react";
-import { useNavigate, type LoaderFunctionArgs } from "react-router";
+import { useNavigate, type LoaderFunctionArgs, useOutletContext } from "react-router";
 import { Page, Layout, Card, BlockStack, Text, Box, Button, InlineStack, ProgressBar, Badge } from "@shopify/polaris";
 import { ClipboardIcon, CheckIcon } from "@shopify/polaris-icons";
 import { authenticate } from "../shopify.server";
@@ -51,6 +51,9 @@ function CodeBlock({ code, filename }: { code: string, filename: string }) {
 
 export default function Guide() {
     const navigate = useNavigate();
+    const { subscription } = useOutletContext<{ subscription: any }>();
+    console.log("Subscription status in Guide:", subscription);
+
     const [currentStep, setCurrentStep] = useState(0);
 
     const steps = [

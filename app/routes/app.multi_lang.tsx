@@ -1,6 +1,6 @@
 import type { LoaderFunctionArgs, ActionFunctionArgs } from 'react-router';
 import { authenticate } from '../shopify.server';
-import { useLoaderData } from 'react-router';
+import { useLoaderData, useOutletContext } from 'react-router';
 import { AUTHORS_QUERY } from '../query/translationQuery';
 import { fetchMetaobjectById, updateMetaobjectTranslation, hasMetaobjectDefinition } from '../utils/transaltionUpdate';
 import { TranslationDefinitionMissing } from "../component/TranslationDefinitionMissing";
@@ -48,7 +48,6 @@ export async function action({ request }: ActionFunctionArgs) {
             const updates: Record<string, string> = updatesRaw ? JSON.parse(updatesRaw) : {};
             const metaobject = await fetchMetaobjectById(admin, metaobjectId);
             const currentTranslation = flattenObject(metaobject.translation?.jsonValue ?? {});
-            delete currentTranslation["__keys_order__"];
 
             const finalTranslation = { ...currentTranslation, ...updates };
 
@@ -64,6 +63,9 @@ export async function action({ request }: ActionFunctionArgs) {
 
 export default function MultiLanguageUpdatePage() {
     const { hasDefinition } = useLoaderData<typeof loader>();
+    const { subscription } = useOutletContext<{ subscription: any }>();
+    console.log("Subscription status in MultiLanguageUpdatePage:", subscription);
+
     if (!hasDefinition) {
         return <TranslationDefinitionMissing pagename="Multiple languages" />;
     }

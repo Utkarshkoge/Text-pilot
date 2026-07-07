@@ -30,6 +30,32 @@ model Session {
   locale        String?
   collaborator  Boolean?  @default(false)
   emailVerified Boolean?  @default(false)
-  refreshToken        String?
+  refreshToken  String?
   refreshTokenExpires DateTime?
 }
+
+model ActiveSubscription {
+  id              String   @id @default(uuid())
+  shopDomain      String   @unique
+  subscriptionId  String
+  popupShown      Boolean  @default(false)
+  updatedAt       DateTime @updatedAt
+}
+
+model SubscriptionHistory {
+  id              String   @id @default(uuid())
+  shopDomain      String
+  status          SubscriptionStatus
+  subscriptionId  String
+  createdAt       DateTime @default(now())
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  CANCELLED
+  EXPIRED
+  PENDING
+  DECLINED
+  FROZEN
+}
+

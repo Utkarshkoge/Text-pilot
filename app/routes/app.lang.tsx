@@ -1,6 +1,6 @@
 import type { LoaderFunctionArgs, ActionFunctionArgs } from 'react-router';
 import { authenticate } from '../shopify.server';
-import { useLoaderData } from 'react-router';
+import { useLoaderData, useOutletContext } from 'react-router';
 import { AUTHORS_QUERY } from '../query/translationQuery';
 import { fetchMetaobjectById, updateMetaobjectTranslation, hasMetaobjectDefinition } from '../utils/transaltionUpdate';
 import { TranslationDefinitionMissing } from "../component/TranslationDefinitionMissing";
@@ -75,7 +75,6 @@ export async function action({ request }: ActionFunctionArgs) {
             // Fetch current state from server to prevent overwriting parallel changes
             const metaobject = await fetchMetaobjectById(admin, metaobjectId);
             const currentTranslation = flattenObject(metaobject.translation?.jsonValue ?? {});
-            delete currentTranslation["__keys_order__"];
 
             // Apply updates and deletions
             for (const [key, value] of Object.entries(updatesToMerge)) {
@@ -99,6 +98,8 @@ export async function action({ request }: ActionFunctionArgs) {
 
 export default function SingleLanguageUpdatePage() {
     const { hasDefinition } = useLoaderData<typeof loader>();
+    const { subscription } = useOutletContext<{ subscription: any }>();
+    console.log("Subscription status in SingleLanguageUpdatePage:", subscription);
 
     if (!hasDefinition) {
         return <TranslationDefinitionMissing pagename="Single language" />;
