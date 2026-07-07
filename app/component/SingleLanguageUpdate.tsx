@@ -399,45 +399,68 @@ export function SingleLanguageUpdate() {
                     </Card>
                 ) : (
                     <InlineGrid columns={mdUp ? '240px 1fr' : '1fr'} gap="400" alignItems="start">
-                        <Card>
-                            <BlockStack gap="200">
-                                <Text as="h2" variant="headingMd">Languages</Text>
-                                <div style={{ maxHeight: '500px', overflowY: 'auto' }}>
-                                    <BlockStack gap="050">
-                                        {displayedNodes.map((node) => {
-                                            const isSelected = node.id === selectedId;
+                        <BlockStack gap="300">
 
-                                            return (
-                                                <div
-                                                    key={node.id}
-                                                    style={{
-                                                        padding: 'var(--p-space-200)',
-                                                        cursor: 'pointer',
-                                                        borderRadius: 'var(--p-border-radius-200)',
-                                                        transition: 'all 0.2s',
-                                                        borderLeft: '3px solid',
-                                                        borderColor: isSelected ? 'var(--p-color-border-interactive)' : 'transparent',
-                                                        backgroundColor: isSelected ? 'var(--p-color-bg-surface-hover)' : 'transparent',
-                                                    }}
-                                                    onClick={() => handleSelectChange(node)}
-                                                >
-                                                    <InlineStack align="space-between" blockAlign="center">
-                                                        <Checkbox
-                                                            label={`${node.language.jsonValue} ${node.total_translations?.value ? `(${node.total_translations.value})` : '(0)'}`}
-                                                            checked={isSelected}
-                                                            onChange={() => handleSelectChange(node)}
-                                                        />
-                                                    </InlineStack>
-                                                    <Box paddingInlineStart="600">
-                                                        <Text as="p" variant="bodyXs" tone="subdued">{node.handle}</Text>
-                                                    </Box>
-                                                </div>
-                                            );
-                                        })}
+                            <Card>
+                                <BlockStack gap="200">
+                                    <Text as="h2" variant="headingMd">Languages</Text>
+                                    <div style={{ maxHeight: '500px', overflowY: 'auto' }}>
+                                        <BlockStack gap="050">
+                                            {displayedNodes.map((node) => {
+                                                const isSelected = node.id === selectedId;
+
+                                                return (
+                                                    <div
+                                                        key={node.id}
+                                                        style={{
+                                                            padding: 'var(--p-space-200)',
+                                                            cursor: 'pointer',
+                                                            borderRadius: 'var(--p-border-radius-200)',
+                                                            transition: 'all 0.2s',
+                                                            borderLeft: '3px solid',
+                                                            borderColor: isSelected ? 'var(--p-color-border-interactive)' : 'transparent',
+                                                            backgroundColor: isSelected ? 'var(--p-color-bg-surface-hover)' : 'transparent',
+                                                        }}
+                                                        onClick={() => handleSelectChange(node)}
+                                                    >
+                                                        <InlineStack align="space-between" blockAlign="center">
+                                                            <Checkbox
+                                                                label={`${node.language.jsonValue} ${node.total_translations?.value ? `(${node.total_translations.value})` : '(0)'}`}
+                                                                checked={isSelected}
+                                                                onChange={() => handleSelectChange(node)}
+                                                            />
+                                                        </InlineStack>
+                                                        <Box paddingInlineStart="600">
+                                                            <Text as="p" variant="bodyXs" tone="subdued">{node.handle}</Text>
+                                                        </Box>
+                                                    </div>
+                                                );
+                                            })}
+                                        </BlockStack>
+                                    </div>
+                                </BlockStack>
+
+                            </Card>
+                            {!subscription?.present && (
+                                <Card>
+                                    <BlockStack gap="300">
+                                        <Text as="h2" variant="headingSm">Upgrade to Advanced</Text>
+                                        <Text as="p" tone="subdued">
+                                            You are currently on the <strong>Free Plan</strong> which limits you to <strong>1 language definition</strong>.
+                                        </Text>
+                                        <Text as="p" tone="subdued">
+                                            Upgrade to the <strong>Advance Plan</strong> to unlock unlimited languages, bulk automatic translations, and key synchronization.
+                                        </Text>
+                                        <Button
+                                            variant="primary"
+                                            onClick={() => navigate("/app/billing/subscribe")}
+                                        >
+                                            Upgrade to Advance Plan
+                                        </Button>
                                     </BlockStack>
-                                </div>
-                            </BlockStack>
-                        </Card>
+                                </Card>
+                            )}
+                        </BlockStack>
 
                         <Card>
                             {selectedId ? (

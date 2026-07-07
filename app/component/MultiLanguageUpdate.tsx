@@ -329,50 +329,74 @@ export default function MultiLanguageUpdate() {
                     <InlineGrid columns={mdUp && processingStatus === 'idle' ? '240px 1fr' : '1fr'} gap="400" alignItems="start">
                         {/* 1. SELECT LANGUAGES */}
                         {processingStatus === 'idle' && (
-                            <Card>
-                                <BlockStack gap="200">
-                                    <Text as="h2" variant="headingMd">Select Languages ({selectedIds.size})</Text>
-                                    {processingStatus === 'idle' && (
-                                        <Box paddingBlockEnd="200" borderColor="border" borderBlockEndWidth="025">
-                                            <Button onClick={toggleAll} size="micro">
-                                                {selectedIds.size === displayedNodes.length ? "Deselect All" : "Select All"}
+                            <BlockStack gap="300">
+
+                                <Card>
+                                    <BlockStack gap="200">
+                                        <Text as="h2" variant="headingMd">Select Languages ({selectedIds.size})</Text>
+                                        {processingStatus === 'idle' && (
+                                            <Box paddingBlockEnd="200" borderColor="border" borderBlockEndWidth="025">
+                                                <Button onClick={toggleAll} size="micro">
+                                                    {selectedIds.size === displayedNodes.length ? "Deselect All" : "Select All"}
+                                                </Button>
+                                            </Box>
+                                        )}
+                                        <div style={{ maxHeight: '500px', overflowY: 'auto' }}>
+                                            <BlockStack gap="050">
+                                                {displayedNodes.map(node => {
+                                                    const isSelected = selectedIds.has(node.id);
+                                                    return (
+                                                        <div
+                                                            key={node.id}
+                                                            onClick={() => toggleSelection(node)}
+                                                            style={{
+                                                                padding: 'var(--p-space-200)',
+                                                                cursor: 'pointer',
+                                                                borderRadius: 'var(--p-border-radius-200)',
+                                                                transition: 'all 0.2s',
+                                                                borderLeft: '3px solid',
+                                                                borderColor: isSelected ? 'var(--p-color-border-interactive)' : 'transparent',
+                                                                backgroundColor: isSelected ? 'var(--p-color-bg-surface-hover)' : 'transparent',
+                                                            }}
+                                                        >
+                                                            <InlineStack align="space-between" blockAlign="center">
+                                                                <div onClick={(e) => e.stopPropagation()}>
+                                                                    <Checkbox
+                                                                        label={`${node.language.jsonValue}`}
+                                                                        checked={isSelected}
+                                                                        onChange={() => toggleSelection(node)}
+                                                                    />
+                                                                </div>
+                                                            </InlineStack>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </BlockStack>
+                                        </div>
+                                    </BlockStack>
+
+                                </Card>
+                                {!subscription?.present && (
+                                    <Card>
+                                        <BlockStack gap="300">
+                                            <Text as="h2" variant="headingSm">Upgrade to Advanced</Text>
+                                            <Text as="p" tone="subdued">
+                                                You are currently on the <strong>Free Plan</strong> which limits you to <strong>1 language definition</strong>.
+                                            </Text>
+                                            <Text as="p" tone="subdued">
+                                                Upgrade to the <strong>Advance Plan</strong> to unlock unlimited languages, bulk automatic translations, and key synchronization.
+                                            </Text>
+                                            <Button
+                                                variant="primary"
+                                                onClick={() => navigate("/app/billing/subscribe")}
+                                            >
+                                                Upgrade to Advance Plan
                                             </Button>
-                                        </Box>
-                                    )}
-                                    <div style={{ maxHeight: '500px', overflowY: 'auto' }}>
-                                        <BlockStack gap="050">
-                                            {displayedNodes.map(node => {
-                                                const isSelected = selectedIds.has(node.id);
-                                                return (
-                                                    <div
-                                                        key={node.id}
-                                                        onClick={() => toggleSelection(node)}
-                                                        style={{
-                                                            padding: 'var(--p-space-200)',
-                                                            cursor: 'pointer',
-                                                            borderRadius: 'var(--p-border-radius-200)',
-                                                            transition: 'all 0.2s',
-                                                            borderLeft: '3px solid',
-                                                            borderColor: isSelected ? 'var(--p-color-border-interactive)' : 'transparent',
-                                                            backgroundColor: isSelected ? 'var(--p-color-bg-surface-hover)' : 'transparent',
-                                                        }}
-                                                    >
-                                                        <InlineStack align="space-between" blockAlign="center">
-                                                            <div onClick={(e) => e.stopPropagation()}>
-                                                                <Checkbox
-                                                                    label={`${node.language.jsonValue}`}
-                                                                    checked={isSelected}
-                                                                    onChange={() => toggleSelection(node)}
-                                                                />
-                                                            </div>
-                                                        </InlineStack>
-                                                    </div>
-                                                );
-                                            })}
                                         </BlockStack>
-                                    </div>
-                                </BlockStack>
-                            </Card>
+                                    </Card>
+                                )}
+
+                            </BlockStack>
                         )}
 
                         {/* RIGHT COLUMN */}
