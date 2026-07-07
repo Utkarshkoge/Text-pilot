@@ -137,6 +137,33 @@ const TextPilotFAQ: React.FC = () => {
                         </p>
                     </section>
 
+                    {/* Section 7 */}
+                    <section style={styles.section}>
+                        <h2 style={styles.h2}>7. What are the subscription plans for Text Pilot?</h2>
+                        <p style={styles.p}>
+                            Text Pilot offers two subscription plans tailored to your store's localization needs:
+                        </p>
+                        <ul style={styles.ul}>
+                            <li style={styles.li}>
+                                <strong style={styles.strong}>Free Plan ($0/month):</strong> Includes support for 1 language definition, standard translation management, and native Shopify storage.
+                            </li>
+                            <li style={styles.li}>
+                                <strong style={styles.strong}>Advance Plan ($5/month):</strong> Unlocks unlimited language definitions, translation key synchronization across all languages, and automatic bulk translation.
+                            </li>
+                        </ul>
+                        <p style={styles.p}>
+                            All subscription and recurring charges are processed securely through Shopify's official Billing API.
+                        </p>
+                    </section>
+
+                    {/* Section 8 */}
+                    <section style={styles.section}>
+                        <h2 style={styles.h2}>8. How many languages does Text Pilot support?</h2>
+                        <p style={styles.p}>
+                            Text Pilot currently supports 80 languages: Afrikaans, Albanian, Amharic, Arabic, Armenian, Assamese, Azerbaijani, Basque, Bengali, Bulgarian, Burmese, Catalan, Cherokee, Chinese (Hong Kong), Chinese (Simplified), Chinese (Traditional), Croatian, Czech, Danish, Dutch, English (UK), English (US), Estonian, Filipino, Finnish, French, French (Canada), Galician, Georgian, German, Greek, Gujarati, Hebrew, Hindi, Hungarian, Icelandic, Indonesian, Irish, Italian, Japanese, Kannada, Kazakh, Khmer, Korean, Lao, Latvian, Lithuanian, Macedonian, Malay, Malayalam, Marathi, Mongolian, Nepali, Norwegian, Odia, Persian, Polish, Portuguese (Brazil), Portuguese (Portugal), Punjabi, Romanian, Russian, Serbian, Sinhala, Slovak, Slovenian, Spanish, Spanish (Latin America), Swahili, Swedish, Tamil, Telugu, Thai, Turkish, Ukrainian, Urdu, Uzbek, Vietnamese, Welsh, Zulu.
+                        </p>
+                    </section>
+
                     {/* Contact Us Section */}
                     <section style={styles.section}>
                         <h2 style={styles.h2}>Contact Us</h2>
@@ -152,7 +179,7 @@ const TextPilotFAQ: React.FC = () => {
                             </p>
 
                             <p style={styles.contactItem}>
-                                <strong style={styles.strongLabel}>Company:</strong> Galaxy Web Links
+                                <strong style={styles.strongLabel}>Company:</strong> Galaxy Weblinks
                             </p>
                             <p style={styles.contactItem}>
                                 <strong style={styles.strongLabel}>Email:</strong>{" "}
@@ -180,7 +207,7 @@ const TextPilotFAQ: React.FC = () => {
                     </section>
                     {/* Footer section matching the template structure */}
                     <footer style={styles.footer}>
-                        <p style={styles.footerText}>© {new Date().getFullYear()} Galaxy Web Links. All rights reserved.</p>
+                        <p style={styles.footerText}>© {new Date().getFullYear()} Galaxy Weblinks. All rights reserved.</p>
                     </footer>
                 </article>
             </main>

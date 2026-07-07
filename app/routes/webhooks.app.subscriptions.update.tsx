@@ -5,9 +5,6 @@ import prisma from "../db.server";
 export const action = async ({ request }: ActionFunctionArgs) => {
     try {
         const { shop, payload } = await authenticate.webhook(request);
-
-        console.log(`Received subscription update webhook for ${shop}:`, JSON.stringify(payload));
-
         const appSubscription = payload.app_subscription || payload;
         const subscriptionId = appSubscription.admin_graphql_api_id || appSubscription.id;
         const status = appSubscription.status;

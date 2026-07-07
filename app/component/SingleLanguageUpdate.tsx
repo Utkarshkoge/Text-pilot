@@ -38,11 +38,6 @@ import { SingleLanguageInstructionsModal } from 'app/component/InstructionsModal
 import { loader } from 'app/routes/app.lang';
 import { flattenObject } from 'app/utils/csvSyncUtils';
 
-function processIncomingTranslation(flat: Record<string, string>): Record<string, string> {
-    const cleaned = { ...flat };
-    return cleaned;
-}
-
 export function SingleLanguageUpdate() {
     const { nodes: rawNodes } = useLoaderData<typeof loader>();
     console.log(rawNodes, '......json');
@@ -53,9 +48,16 @@ export function SingleLanguageUpdate() {
 
     const nodes = rawNodes as LanguageNode[];
     const { subscription } = useOutletContext<{ subscription: any }>();
-    const displayedNodes = (!subscription?.present && nodes.length > 0)
-        ? [nodes[0]]
-        : nodes;
+    const displayedNodes = useMemo(() => {
+        if (subscription?.present) {
+            return nodes;
+        }
+        else if (nodes.length === 0) return [];
+        const firstLangNode = nodes.find(
+            (node) => node.locale?.jsonValue === subscription?.firstLanguage
+        );
+        return firstLangNode ? [firstLangNode] : [nodes[0]];
+    }, [nodes, subscription]);
     const data = { nodes };
 
     // translation is always a flat Record<string, string>
@@ -170,10 +172,10 @@ export function SingleLanguageUpdate() {
 
     // Auto-select first node or ID from query parameter on load
     useEffect(() => {
-        if (!selectedId && data.nodes.length > 0) {
-            handleSelectChange(data.nodes[0]);
+        if (!selectedId && displayedNodes.length > 0) {
+            handleSelectChange(displayedNodes[0]);
         }
-    }, [selectedId, data.nodes]);
+    }, [selectedId, displayedNodes, handleSelectChange]);
 
     const handleKeyChange = useCallback((key: string, v: string) => {
         inputBufferRef.current[key] = v;
@@ -446,10 +448,10 @@ export function SingleLanguageUpdate() {
                                     <BlockStack gap="300">
                                         <Text as="h2" variant="headingSm">Upgrade to Advanced</Text>
                                         <Text as="p" tone="subdued">
-                                            You are currently on the <strong>Free Plan</strong> which limits you to <strong>1 language definition</strong>.
+                                            You are currently on the <strong>Free Plan</strong> which you can only manage 1 language translations.
                                         </Text>
                                         <Text as="p" tone="subdued">
-                                            Upgrade to the <strong>Advance Plan</strong> to unlock unlimited languages, bulk automatic translations, and key synchronization.
+                                            Upgrade to the <strong>Advance Plan</strong> to unlock All languages.
                                         </Text>
                                         <Button
                                             variant="primary"
@@ -510,7 +512,7 @@ export function SingleLanguageUpdate() {
                                                 />
                                                 <DataSyncModals
                                                     currentTranslation={translation}
-                                                    availableNodes={data.nodes}
+                                                    availableNodes={displayedNodes}
                                                     currentLanguageId={selectedId}
                                                     onSyncComplete={(updates) => {
                                                         setTranslation(prev => ({ ...updates, ...prev! }));

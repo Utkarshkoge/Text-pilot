@@ -35,13 +35,29 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
         const response = await admin.graphql(AUTHORS_QUERY);
         const json = await response.json();
+        const definitions = (json.data?.metaobjects?.nodes || []) as Definition[];
 
         const activeSub = await prisma.activeSubscription.findUnique({
             where: { shopDomain: session.shop }
         });
 
+        if (definitions.length > 0) {
+            const currentSession = await prisma.session.findFirst({
+                where: { shop: session.shop }
+            });
+            if (currentSession && !currentSession.firstLanguage) {
+                const firstFetchedLocale = definitions[0].locale?.jsonValue;
+                if (firstFetchedLocale) {
+                    await prisma.session.updateMany({
+                        where: { shop: session.shop },
+                        data: { firstLanguage: firstFetchedLocale }
+                    });
+                }
+            }
+        }
+
         return {
-            definitions: (json.data?.metaobjects?.nodes || []) as Definition[],
+            definitions,
             hasDefinition: true,
             isSubscribed: !!activeSub,
         };
@@ -89,6 +105,13 @@ export async function action({ request }: ActionFunctionArgs) {
             }
 
             const locale = formData.get("locale") as string;
+
+            if (currentCount === 0) {
+                await prisma.session.updateMany({
+                    where: { shop: session.shop },
+                    data: { firstLanguage: locale }
+                });
+            }
 
             const language = formData.get("language") as string;
             const syncSourceId = formData.get("syncSourceId") as string | null;
@@ -167,6 +190,15 @@ export async function action({ request }: ActionFunctionArgs) {
             const deletedLocaleCode = def?.locale?.jsonValue || "";
 
             await deleteMetaobject(admin, id);
+
+            const remainingCount = nodes.filter((d) => d.id !== id).length;
+            if (remainingCount === 0) {
+                await prisma.session.updateMany({
+                    where: { shop: session.shop },
+                    data: { firstLanguage: null }
+                });
+            }
+
             return {
                 success: true,
                 message: "Language definition deleted",
@@ -183,8 +215,6 @@ export async function action({ request }: ActionFunctionArgs) {
 
 export default function AppDefinitionPage() {
     const { hasDefinition } = useLoaderData<typeof loader>();
-    const { subscription } = useOutletContext<{ subscription: any }>();
-    console.log("Subscription status in AppDefinitionPage:", subscription);
 
     if (!hasDefinition) {
         return <TranslationDefinitionMissing pagename="Manage Definitions" />;

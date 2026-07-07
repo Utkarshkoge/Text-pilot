@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useLoaderData, useFetcher, useNavigate, useOutletContext } from "react-router";
 import {
     Page,
@@ -35,11 +35,18 @@ export default function AppDefinition() {
     const fetcher = useFetcher<any>();
     const navigate = useNavigate();
     const { subscription } = useOutletContext<{ subscription: any }>();
-    console.log("Subscription status in AppDefinition:", subscription);
 
-    const displayedDefinitions = (!subscription?.present && definitions?.length > 0)
-        ? [definitions[0]]
-        : (definitions || []);
+    const displayedDefinitions = useMemo(() => {
+        const list = definitions || [];
+        if (subscription?.present) {
+            return list;
+        }
+        else if (list.length === 0) return [];
+        const firstLangDef = list.find(
+            (d) => d.locale?.jsonValue === subscription?.firstLanguage
+        );
+        return firstLangDef ? [firstLangDef] : [list[0]];
+    }, [definitions, subscription]);
 
     const [modalOpen, setModalOpen] = useState(false);
     const [upgradeModalOpen, setUpgradeModalOpen] = useState(false);
@@ -66,6 +73,7 @@ export default function AppDefinition() {
         translations: Record<string, string>;
     } | null>(null);
     const [instructionsOpen, setInstructionsOpen] = useState(false);
+    const [supportedLangsModalOpen, setSupportedLangsModalOpen] = useState(false);
     const [submittingIntent, setSubmittingIntent] = useState<string | null>(null);
     const [isTranslating, setIsTranslating] = useState(false);
     const [translationProgress, setTranslationProgress] = useState<{ done: number, total: number } | null>(null);
@@ -348,7 +356,7 @@ export default function AppDefinition() {
                     {
                         content: "Instructions",
                         onAction: () => setInstructionsOpen(true),
-                    },
+                    }
                 ]}
             >
                 <style>{`
@@ -365,6 +373,10 @@ export default function AppDefinition() {
                                 action={{
                                     content: "Upgrade to Advance Plan",
                                     onAction: () => navigate("/app/billing/subscribe")
+                                }}
+                                secondaryAction={{
+                                    content: "Check Supported Languages",
+                                    onAction: () => setSupportedLangsModalOpen(true)
                                 }}
                             >
                                 <p>
@@ -881,6 +893,42 @@ export default function AppDefinition() {
                                 Currently, you are on the Free Plan which allows only <strong>1 language definition</strong>. Upgrade today to add unlimited languages, translate them instantly, and reach customers worldwide.
                             </Text>
                         </BlockStack>
+                    </Modal.Section>
+                </Modal>
+
+                <Modal
+                    open={supportedLangsModalOpen}
+                    onClose={() => setSupportedLangsModalOpen(false)}
+                    title={`Supported Languages (${LANGUAGES.length})`}
+                    secondaryActions={[
+                        {
+                            content: "Close",
+                            onAction: () => setSupportedLangsModalOpen(false)
+                        }
+                    ]}
+                >
+                    <Modal.Section>
+                        <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
+                            <div style={{
+                                display: 'grid',
+                                gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
+                                gap: '12px',
+                                padding: '8px'
+                            }}>
+                                {LANGUAGES.map((lang, index) => (
+                                    <div key={lang.code} style={{
+                                        padding: '8px 12px',
+                                        backgroundColor: 'var(--p-color-bg-surface-secondary)',
+                                        borderRadius: '6px',
+                                        border: '1px solid var(--p-color-border-subdued)'
+                                    }}>
+                                        <Text as="span" variant="bodyMd" fontWeight="semibold">
+                                            {index + 1}. {lang.label}
+                                        </Text>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
                     </Modal.Section>
                 </Modal>
             </Page>

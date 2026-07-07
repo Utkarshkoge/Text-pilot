@@ -1,5 +1,5 @@
 import { LoaderFunctionArgs, ActionFunctionArgs, useLoaderData, useFetcher, useOutletContext } from "react-router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
     Page,
     Layout,
@@ -12,10 +12,12 @@ import {
     Grid,
     InlineStack,
     List,
-    Divider
+    Divider,
+    Modal
 } from "@shopify/polaris";
 import { authenticate } from "../shopify.server";
 import prisma from "../db.server";
+import { LANGUAGES } from "../component/Languages";
 
 export const PLANS = {
     ADVANCED: {
@@ -144,6 +146,8 @@ export default function BillingPage() {
 
 
 
+    const [supportedLangsModalOpen, setSupportedLangsModalOpen] = useState(false);
+
     const handleSubscribe = (plan: PlanKey) => {
         fetcher.submit(
             { plan },
@@ -164,7 +168,16 @@ export default function BillingPage() {
     }, [fetcher.data]);
 
     return (
-        <Page title="Plans & Billing" subtitle="Choose the right plan for your international expansion.">
+        <Page
+            title="Plans & Billing"
+            subtitle="Unlock more features with the right plan."
+            secondaryActions={[
+                {
+                    content: "Check Supported Languages",
+                    onAction: () => setSupportedLangsModalOpen(true),
+                }
+            ]}
+        >
             <Layout>
                 <Layout.Section>
                     <Grid>
@@ -187,9 +200,12 @@ export default function BillingPage() {
                                     <BlockStack gap="200">
                                         <Text as="p" variant="bodyMd" fontWeight="medium">Features included:</Text>
                                         <List type="bullet">
-                                            <List.Item>1 Supported Language definition</List.Item>
-                                            <List.Item>Standard Translation translation capabilities</List.Item>
-                                            <List.Item>Native Shopify Metaobject Storage</List.Item>
+                                            <List.Item>Support for 1 language</List.Item>
+                                            <List.Item>Manage translations from a single language</List.Item>
+                                            <List.Item>Auto Translation for new content</List.Item>
+                                            <List.Item>Store translations securely in Shopify metaobjects</List.Item>
+                                            <List.Item>Anytime create and update translation keys</List.Item>
+                                            <List.Item>CSV import and export for translations</List.Item>
                                         </List>
                                     </BlockStack>
 
@@ -231,10 +247,13 @@ export default function BillingPage() {
                                             <Text as="p" variant="bodyMd" fontWeight="medium">Features included:</Text>
                                             <div style={{ color: 'var(--p-color-text-success)' }}>
                                                 <List type="bullet">
-                                                    <List.Item>Unlimited supported languages (add more than one)</List.Item>
-                                                    <List.Item>Sync translation keys across languages</List.Item>
-                                                    <List.Item>Automatic bulk language translation</List.Item>
-                                                    <List.Item>Priority storefront loading and native storage</List.Item>
+                                                    <List.Item>All language support</List.Item>
+                                                    <List.Item>Auto Translation for new content</List.Item>
+                                                    <List.Item>CSV import and export for translations</List.Item>
+                                                    <List.Item>Manage multiple languages translation from a single dashboard</List.Item>
+                                                    <List.Item>Store translations securely in Shopify metaobjects</List.Item>
+                                                    <List.Item>Update translations anytime without redeploying your Hydrogen storefront</List.Item>
+                                                    <List.Item>CSV import and export for translations across all languages</List.Item>
                                                 </List>
                                             </div>
                                         </BlockStack>
@@ -260,6 +279,42 @@ export default function BillingPage() {
                     </Grid>
                 </Layout.Section>
             </Layout>
+
+            <Modal
+                open={supportedLangsModalOpen}
+                onClose={() => setSupportedLangsModalOpen(false)}
+                title={`Supported Languages (${LANGUAGES.length})`}
+                secondaryActions={[
+                    {
+                        content: "Close",
+                        onAction: () => setSupportedLangsModalOpen(false)
+                    }
+                ]}
+            >
+                <Modal.Section>
+                    <div style={{ maxHeight: '400px', overflowY: 'auto' }}>
+                        <div style={{
+                            display: 'grid',
+                            gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))',
+                            gap: '12px',
+                            padding: '8px'
+                        }}>
+                            {LANGUAGES.map((lang, index) => (
+                                <div key={lang.code} style={{
+                                    padding: '8px 12px',
+                                    backgroundColor: 'var(--p-color-bg-surface-secondary)',
+                                    borderRadius: '6px',
+                                    border: '1px solid var(--p-color-border-subdued)'
+                                }}>
+                                    <Text as="span" variant="bodyMd" fontWeight="semibold">
+                                        {index + 1}. {lang.label}
+                                    </Text>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </Modal.Section>
+            </Modal>
         </Page>
     );
 }

@@ -230,6 +230,27 @@ const TextPilotDocumentation: React.FC = () => {
                         <p style={styles.p}>
                             Your translations remain fully owned by you and are available directly through Shopify.
                         </p>
+
+                        <h3 style={styles.h3}>What are the subscription plans for Text Pilot?</h3>
+                        <p style={styles.p}>
+                            Text Pilot offers two subscription plans:
+                        </p>
+                        <ul style={styles.ul}>
+                            <li style={styles.li}>
+                                <strong style={styles.strong}>Free Plan ($0/month):</strong> Includes support for 1 language definition, standard translation management, and native Shopify storage.
+                            </li>
+                            <li style={styles.li}>
+                                <strong style={styles.strong}>Advance Plan ($5/month):</strong> Unlocks unlimited language definitions, translation key synchronization across all languages, and automatic bulk translation.
+                            </li>
+                        </ul>
+                        <p style={styles.p}>
+                            All subscription and recurring charges are processed securely through Shopify's official Billing API.
+                        </p>
+
+                        <h3 style={styles.h3}>How many languages does Text Pilot support?</h3>
+                        <p style={styles.p}>
+                            Text Pilot currently supports 80 languages: Afrikaans, Albanian, Amharic, Arabic, Armenian, Assamese, Azerbaijani, Basque, Bengali, Bulgarian, Burmese, Catalan, Cherokee, Chinese (Hong Kong), Chinese (Simplified), Chinese (Traditional), Croatian, Czech, Danish, Dutch, English (UK), English (US), Estonian, Filipino, Finnish, French, French (Canada), Galician, Georgian, German, Greek, Gujarati, Hebrew, Hindi, Hungarian, Icelandic, Indonesian, Irish, Italian, Japanese, Kannada, Kazakh, Khmer, Korean, Lao, Latvian, Lithuanian, Macedonian, Malay, Malayalam, Marathi, Mongolian, Nepali, Norwegian, Odia, Persian, Polish, Portuguese (Brazil), Portuguese (Portugal), Punjabi, Romanian, Russian, Serbian, Sinhala, Slovak, Slovenian, Spanish, Spanish (Latin America), Swahili, Swedish, Tamil, Telugu, Thai, Turkish, Ukrainian, Urdu, Uzbek, Vietnamese, Welsh, Zulu.
+                        </p>
                     </section>
 
                     {/* Section 5: Managing Languages */}
@@ -310,17 +331,20 @@ const TextPilotDocumentation: React.FC = () => {
 
                     {/* Conclusion / Contact Card */}
                     <section style={styles.section}>
-                        <h2 style={styles.h2}>8. Conclusion &amp; Support</h2>
+                        <h2 style={styles.h2}>Contact Us</h2>
+
                         <p style={styles.p}>
-                            Text Pilot provides a powerful, fast, and secure environment for custom storefront translations, backstopped by native Shopify Metaobjects.
+                            If you have any questions, feedback, or require assistance with Text Pilot,
+                            please contact our support team.
                         </p>
 
                         <div style={styles.contactCard}>
                             <p style={styles.contactItem}>
-                                <strong style={styles.strongLabel}>App Ecosystem:</strong> Text Pilot (Shopify Embedded App)
+                                <strong style={styles.strongLabel}>App:</strong> Text Pilot
                             </p>
+
                             <p style={styles.contactItem}>
-                                <strong style={styles.strongLabel}>Developed By:</strong> Galaxy WebLinks
+                                <strong style={styles.strongLabel}>Company:</strong> Galaxy Weblinks
                             </p>
                             <p style={styles.contactItem}>
                                 <strong style={styles.strongLabel}>Email:</strong>{" "}
@@ -334,7 +358,7 @@ const TextPilotDocumentation: React.FC = () => {
                                 </a>
                             </p>
                             <p style={styles.contactItem}>
-                                <strong style={styles.strongLabel}>Support Website:</strong>{" "}
+                                <strong style={styles.strongLabel}>Website:</strong>{" "}
                                 <a
                                     href="https://www.galaxyweblinks.com"
                                     target="_blank"
@@ -349,7 +373,7 @@ const TextPilotDocumentation: React.FC = () => {
 
                     {/* Footer Section */}
                     <footer style={styles.footer}>
-                        <p style={styles.footerText}>© {new Date().getFullYear()} Galaxy Web Links. All rights reserved.</p>
+                        <p style={styles.footerText}>© {new Date().getFullYear()} Galaxy Weblinks. All rights reserved.</p>
                     </footer>
                 </article>
             </main>

@@ -22,7 +22,7 @@ const TextPilotPrivacy: React.FC = () => {
                         <h1 style={styles.pageTitle}>Privacy Policy</h1>
 
                         <p style={{ ...styles.leadParagraph, marginTop: '0.5rem', color: '#6d7175' }}>
-                            This Privacy Policy explains how Galaxy Web Links ("we", "us", or "our") collects, uses, and protects information when merchants use the <strong style={styles.strong}>Text Pilot</strong> application ("App").
+                            This Privacy Policy explains how Galaxy Weblinks ("we", "us", or "our") collects, uses, and protects information when merchants use the <strong style={styles.strong}>Text Pilot</strong> application ("App").
                         </p>
                     </header>
 
@@ -128,7 +128,7 @@ const TextPilotPrivacy: React.FC = () => {
                     <section style={styles.section}>
                         <h2 style={styles.h2}>8. Billing</h2>
                         <p style={styles.p}>
-                            Text Pilot is currently free to use. The App does not contain hidden subscription plans, recurring charges, usage-based fee sheets, or locked paid functionalities.
+                            Text Pilot offers both Free and Paid subscription plans. The <strong style={styles.strong}>Free Plan ($0/month)</strong> includes support for one language definition and standard translation management. The <strong style={styles.strong}>Advance Plan ($5/month)</strong> offers unlimited supported languages, translation key synchronization, and automatic bulk translation. All billing and recurring subscription charges are processed securely through Shopify's official Billing API.
                         </p>
                     </section>
 
@@ -156,7 +156,7 @@ const TextPilotPrivacy: React.FC = () => {
                             </p>
 
                             <p style={styles.contactItem}>
-                                <strong style={styles.strongLabel}>Company:</strong> Galaxy Web Links
+                                <strong style={styles.strongLabel}>Company:</strong> Galaxy Weblinks
                             </p>
                             <p style={styles.contactItem}>
                                 <strong style={styles.strongLabel}>Email:</strong>{" "}
@@ -185,7 +185,7 @@ const TextPilotPrivacy: React.FC = () => {
 
                     {/* Footer section */}
                     <footer style={styles.footer}>
-                        <p style={styles.footerText}>© 2026 Galaxy Web Links. All rights reserved.</p>
+                        <p style={styles.footerText}>© 2026 Galaxy Weblinks. All rights reserved.</p>
                     </footer>
                 </article>
             </main>

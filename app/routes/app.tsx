@@ -12,7 +12,7 @@ import prisma from "../db.server";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   try {
-    const { session } = await authenticate.admin(request);
+    const { admin, session } = await authenticate.admin(request);
     const shopDomain = session.shop;
 
     const activeSub = await prisma.activeSubscription.findUnique({
@@ -41,12 +41,59 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
       }
     }
 
+    if (!present) {
+      try {
+        const response = await admin.graphql(
+          `#graphql
+          query ActiveSubscriptionsForCurrentApp {
+            currentAppInstallation {
+              activeSubscriptions {
+                id
+                name
+                status
+                createdAt
+                currentPeriodEnd
+              }
+            }
+          }
+          `
+        );
+        const responseJson = await response.json();
+
+        const activeSubFromApi = responseJson.data?.currentAppInstallation?.activeSubscriptions?.find(
+          (sub: any) => sub.status === "ACTIVE"
+        );
+
+        if (activeSubFromApi) {
+          present = true;
+          if (activeSubFromApi.currentPeriodEnd) {
+            const periodEnd = new Date(activeSubFromApi.currentPeriodEnd);
+            const today = new Date();
+            const diffTime = periodEnd.getTime() - today.getTime();
+            const calculatedDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            remainingDays = Math.max(0, calculatedDays);
+          }
+        }
+      } catch (apiError) {
+        console.error("Error querying active subscriptions via API:", apiError);
+      }
+    }
+
+    let firstLanguage: string | null = null;
+    if (!present) {
+      const dbSession = await prisma.session.findFirst({
+        where: { shop: shopDomain }
+      });
+      firstLanguage = dbSession?.firstLanguage || null;
+    }
+
     // eslint-disable-next-line no-undef
     return {
       apiKey: process.env.SHOPIFY_API_KEY || "",
       subscription: {
         present,
-        remainingDays
+        remainingDays,
+        firstLanguage
       }
     };
   } catch (error) {

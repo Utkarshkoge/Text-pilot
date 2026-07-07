@@ -155,7 +155,7 @@ export default function Index() {
           <Layout.Section>
             <Card>
               <InlineStack align="space-between" blockAlign="center">
-                <InlineStack gap="800" blockAlign="center">
+                <InlineStack gap="600" blockAlign="center">
                   {/* Current Plan */}
                   <BlockStack gap="200">
                     <Text
@@ -174,12 +174,12 @@ export default function Index() {
                   {/* Status Message */}
                   <BlockStack>
                     {subscription?.present ? (
-                      <Text variant="bodyLg" tone="success" fontWeight="bold" as="strong">
-                        Easily manage all your languages simply
+                      <Text variant="bodyMd" tone="success" fontWeight="bold" as="strong">
+                        Subscription is active. Manage multilingual translations for your Hydrogen storefront.
                       </Text>
                     ) : (
                       <Text variant="bodyMd" tone="success" fontWeight="bold" as="strong">
-                        Please upgrade your plan so that you can add more than one language
+                        Upgrade your plan to enable multilingual translations for your Hydrogen storefront.
                       </Text>
                     )}
                   </BlockStack>

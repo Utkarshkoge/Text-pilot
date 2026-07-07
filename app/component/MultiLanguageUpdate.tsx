@@ -50,9 +50,16 @@ export default function MultiLanguageUpdate() {
     const navigate = useNavigate();
     const nodes = rawNodes as LanguageNode[];
     const { subscription } = useOutletContext<{ subscription: any }>();
-    const displayedNodes = (!subscription?.present && nodes.length > 0)
-        ? [nodes[0]]
-        : nodes;
+    const displayedNodes = useMemo(() => {
+        if (subscription?.present) {
+            return nodes;
+        }
+        else if (nodes.length === 0) return [];
+        const firstLangNode = nodes.find(
+            (node) => node.locale?.jsonValue === subscription?.firstLanguage
+        );
+        return firstLangNode ? [firstLangNode] : [nodes[0]];
+    }, [nodes, subscription]);
     // schema is always flat: { key: '' }
     const [schema, setSchema] = useState<Record<string, string>>({});
     const [directKey, setDirectKey] = useState('');
@@ -381,10 +388,10 @@ export default function MultiLanguageUpdate() {
                                         <BlockStack gap="300">
                                             <Text as="h2" variant="headingSm">Upgrade to Advanced</Text>
                                             <Text as="p" tone="subdued">
-                                                You are currently on the <strong>Free Plan</strong> which limits you to <strong>1 language definition</strong>.
+                                                You are currently on the <strong>Free Plan</strong> which you can only manage 1 language translations.
                                             </Text>
                                             <Text as="p" tone="subdued">
-                                                Upgrade to the <strong>Advance Plan</strong> to unlock unlimited languages, bulk automatic translations, and key synchronization.
+                                                Upgrade to the <strong>Advance Plan</strong> to unlock All languages.
                                             </Text>
                                             <Button
                                                 variant="primary"
