@@ -1,6 +1,6 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
-client_id = "854768ddbd1ccb98d4801ea8a5b5798c"
+client_id = "3b53ede27461e099fb561fb2931d5565"
 name = "Text Pilot"
 application_url = "https://example.com"
 embedded = true

@@ -7,6 +7,7 @@ import { CsvImportModals } from './CsvSync/CsvImportModalsMulti';
 import { Toast, Frame } from '@shopify/polaris';
 import { MultiLanguageInstructionsModal } from 'app/component/InstructionsModal';
 import { loader } from 'app/routes/app.multi_lang';
+import { usePreventNavigation } from 'app/hooks/usePreventNavigation';
 
 type LanguageNode = {
     id: string;
@@ -69,6 +70,7 @@ export default function MultiLanguageUpdate() {
     const [completedCount, setCompletedCount] = useState(0);
     const [autoTranslate, setAutoTranslate] = useState(false);
     const [showAutoTranslateConfirmModal, setShowAutoTranslateConfirmModal] = useState(false);
+    usePreventNavigation(processingStatus === 'running');
     type LanguageStatus = 'pending' | 'translating' | 'saving' | 'complete' | 'error';
     type LanguageProgress = {
         status: LanguageStatus;

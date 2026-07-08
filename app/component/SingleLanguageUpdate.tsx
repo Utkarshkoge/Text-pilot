@@ -1,6 +1,7 @@
 import { useLoaderData, useFetcher, useNavigate, useOutletContext } from 'react-router';
 
 import { useEffect, useState, useRef, useCallback, useMemo } from 'react';
+import { usePreventNavigation } from 'app/hooks/usePreventNavigation';
 import {
     Page,
     Card,
@@ -79,6 +80,7 @@ export function SingleLanguageUpdate() {
     const [translationFilter, setTranslationFilter] = useState<'all' | 'translated' | 'not_translated'>('all');
     const [isRunning, setIsRunning] = useState(false);
     const [instructionsOpen, setInstructionsOpen] = useState(false);
+    usePreventNavigation(isTranslating || (fetcher.state !== 'idle' && fetcher.formData?.get('operation') === 'submit_changes'));
 
     // Pagination State
     const [currentPage, setCurrentPage] = useState(1);

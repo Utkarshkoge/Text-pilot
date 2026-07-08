@@ -15,6 +15,7 @@ import {
   Divider,
   Badge,
   Modal,
+  Icon,
 } from "@shopify/polaris";
 import {
   LanguageIcon,
@@ -26,6 +27,7 @@ import {
   CodeIcon,
   StarIcon,
   ClockIcon,
+  CreditCardIcon,
 } from "@shopify/polaris-icons";
 import { authenticate } from "../shopify.server";
 import { RouteErrorBoundary } from "app/component/RouteErrorBoundary";
@@ -152,45 +154,38 @@ export default function Index() {
       >
         <Layout>
           {/* ── Subscription Plan Status Card ── */}
+
           <Layout.Section>
-            <Card>
+            <Card padding="400">
               <InlineStack align="space-between" blockAlign="center">
-                <InlineStack gap="600" blockAlign="center">
-                  {/* Current Plan */}
-                  <BlockStack gap="200">
-                    <Text
-                      variant="bodyXs"
-                      tone="subdued"
-                      fontWeight="bold"
-                      as="span"
-                    >
-                      CURRENT PLAN
+                {/* Left: Plan Info */}
+                <BlockStack gap="100">
+                  <InlineStack gap="200" align="start" blockAlign="center">
+                    <Text variant="headingMd" as="h2">
+                      Current Subscription
                     </Text>
-                    <Badge tone={subscription?.present ? "success" : "info"}>
+                    <Badge tone={subscription?.present ? "success" : "attention"}>
                       {subscriptionName}
                     </Badge>
-                  </BlockStack>
+                  </InlineStack>
+                  {subscription?.present ? (
+                    <Text variant="bodyMd" tone="success" fontWeight="bold" as="strong">
+                      Subscription is active. Manage multilingual translations for your Hydrogen storefront.
+                    </Text>
+                  ) : (
+                    <Text variant="bodyMd" tone="success" fontWeight="bold" as="strong">
+                      Upgrade your plan to enable multilingual translations for your Hydrogen storefront.
+                    </Text>
+                  )}
+                </BlockStack>
 
-                  {/* Status Message */}
-                  <BlockStack>
-                    {subscription?.present ? (
-                      <Text variant="bodyMd" tone="success" fontWeight="bold" as="strong">
-                        Subscription is active. Manage multilingual translations for your Hydrogen storefront.
-                      </Text>
-                    ) : (
-                      <Text variant="bodyMd" tone="success" fontWeight="bold" as="strong">
-                        Upgrade your plan to enable multilingual translations for your Hydrogen storefront.
-                      </Text>
-                    )}
-                  </BlockStack>
-                </InlineStack>
-
-                <InlineStack gap="400" blockAlign="center">
-                  {subscription?.present && remainingDays !== undefined && (
+                {/* Right: Icon + Time and Button */}
+                <InlineStack gap="600" blockAlign="center">
+                  {remainingDays !== undefined && (
                     <Box
                       paddingInlineEnd="400"
-                      borderInlineEndWidth="0"
-                      borderColor="border"
+                      borderInlineEndWidth={!subscription?.present ? "025" : "0"}
+                      borderColor="border-secondary"
                     >
                       <InlineStack gap="300" blockAlign="center">
                         <Box
@@ -202,7 +197,10 @@ export default function Index() {
                           }
                           borderRadius="200"
                         >
-                          <ClockIcon width={20} height={20} />
+                          <Icon
+                            source={ClockIcon}
+                            tone={remainingDays <= 5 ? "critical" : "base"}
+                          />
                         </Box>
                         <BlockStack gap="100">
                           <Text
@@ -225,13 +223,13 @@ export default function Index() {
                       </InlineStack>
                     </Box>
                   )}
-
                   {!subscription?.present && (
                     <Button
                       variant="primary"
+                      icon={CreditCardIcon}
                       onClick={() => navigate("/app/billing/subscribe")}
                     >
-                      Upgrade to Advance Plan
+                      Manage Subscription
                     </Button>
                   )}
                 </InlineStack>

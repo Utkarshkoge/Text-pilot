@@ -114,8 +114,7 @@ export default function App() {
           <s-link href="/app/multi_lang">Multiple Languages</s-link>
           <s-link href="/app/definition">Manage Definitions</s-link>
           <s-link href="/app/guide">Developer Guide</s-link>
-          <s-link href="/app/billing/subscribe">Billing</s-link>
-
+          <s-link href="/app/billing/subscribe">Subscription Plans</s-link>
         </s-app-nav>
         <Outlet context={{ subscription }} />
       </PolarisAppProvider>

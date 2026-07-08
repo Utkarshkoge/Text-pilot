@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { useLoaderData, useFetcher, useNavigate, useOutletContext } from "react-router";
+import { usePreventNavigation } from "app/hooks/usePreventNavigation";
 import {
     Page,
     Layout,
@@ -81,6 +82,7 @@ export default function AppDefinition() {
     const cancelRef = useRef(false);
     const isPausedRef = useRef(false);
     const resolvePauseRef = useRef<(() => void) | null>(null);
+    usePreventNavigation(isTranslating || fetcher.state !== 'idle');
 
     const getOptions = useCallback((searchValue: string = "") => {
         const existingLocales = new Set(definitions.map(d => d.locale.jsonValue));
